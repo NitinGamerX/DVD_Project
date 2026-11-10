@@ -9,9 +9,9 @@ from pathlib import Path
 
 # Any of these in the ngspice log means the result cannot be trusted.
 _FATAL = re.compile(
-    r"(^Error\b|\berror:|singular matrix|Timestep too small|"
-    r"iteration limit reached|no convergence|gmin stepping failed|"
-    r"source stepping failed|Could not find include file)",
+    r"(^\s*Error\b|simulation\(s\) aborted|singular matrix|Timestep too small|"
+    r"iteration limit reached|Could not find include file|undefined (?:parameter|symbol)|"
+    r"unknown parameter|cannot recover)",
     re.I | re.M,
 )
 _PRINT = re.compile(r"^\s*([\w#().+\-*/]+)\s*=\s*([-+]?[0-9.]+(?:[eE][-+]?[0-9]+)?)\s*$", re.M)

@@ -14,3 +14,11 @@ update the status here and the value there in the same commit.
 | D6 | 3-bit CLA structure and carry-in | Built only from INV/NAND2/NOR2/AND2/OR2; carry-in present → 7 inputs, 128 combinations | **Ask TA** |
 | D7 | Sign convention of currents in the CSVs | ngspice source branch current I(Vx), as in the example netlist and the slides' sample database | Default |
 | D8 | Simulator | ngspice 42 (Ubuntu 24.04 package), BSIM4 level 54 from the model file | Default |
+| D9 | Which oxide parameters vary | Only `toxe`, as section 4 lists; `toxp`, `toxm`, `toxref`, `dtox` stay at their model-file values. ngspice already ignores `dtox` for this file (warning on every run, also with the unmodified file). | Follows the document |
+| D10 | Current used for the transistor `is` column when source = drain voltage | Whatever ngspice reports; no special handling (Vd = Vs has probability zero under continuous sampling) | Default |
+
+## Findings from Phase 1
+
+- Batch (alterparam) and literal netlists agree to about 1e-14 relative on Id/Is, so every sampled parameter is applied.
+- Sensitivity at nominal bias, −10 % → +10 % of each parameter: vth0 changes OFF current by 70–77 %, toxe changes gate current by about 90 %, xj changes currents by at most about 1 %.
+- PMOS OFF body current is below the simulator's resolution (about 1e-16 A) in most samples; see `data/fet/README.md`.

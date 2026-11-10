@@ -1,0 +1,21 @@
+* Single-transistor netlist, case PMOS_ON (Vg=0, Vb=VDD)
+* Reproduces sample 0 of data/fet/pmos_on.csv
+* Every terminal has its own voltage source; source/drain areas included.
+* Process parameters (both device types defined; this case uses the PMOS set):
+.param vth0_n=0.3692 toxe_n=6.5e-10 ndep_n=1.2e+19 u0_n=0.0181 xj_n=7.2e-09
+.param vth0_p=-0.2757254171138124 toxe_p=6.490790116906894e-10 ndep_p=4.4379868872267587e+18 u0_p=0.0025172572599931275 xj_p=6.867462803643948e-09
+.include ../../model/derived/22nm_MGK_param.pm
+.options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9
+.temp 49.889470793461626
+* VDD = 0.9457128626025342 V
+M1 d g s b pmos W=3.1433304302975663e-08 L=2.2e-08 AS=1.383065389330929e-15 AD=1.383065389330929e-15 PS=1.5086660860595133e-07 PD=1.5086660860595133e-07
+Vd d 0 0.8403782869526776
+Vg g 0 0.0
+Vs s 0 0.7390019352565271
+Vb b 0 0.9457128626025342
+.control
+set numdgt=15
+op
+print i(vd) i(vg) i(vs) i(vb)
+.endc
+.end

@@ -1,0 +1,21 @@
+* Single-transistor netlist, case NMOS_OFF (Vg=0, Vb=0)
+* Reproduces sample 0 of data/fet/nmos_off.csv
+* Every terminal has its own voltage source; source/drain areas included.
+* Process parameters (both device types defined; this case uses the NMOS set):
+.param vth0_n=0.3644545298223401 toxe_n=6.508913679724983e-10 ndep_n=1.2620288343074083e+19 u0_n=0.01802521453117838 xj_n=7.89338905829229e-09
+.param vth0_p=-0.25399 toxe_p=6.7e-10 ndep_p=4.4e+18 u0_p=0.0023 xj_p=7.2e-09
+.include ../../model/derived/22nm_MGK_param.pm
+.options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9
+.temp 44.57138403821263
+* VDD = 1.0087023608563213 V
+M1 d g s b nmos W=1.6083033633299543e-07 L=2.2e-08 AS=7.076534798651799e-15 AD=7.076534798651799e-15 PS=4.0966067266599086e-07 PD=4.0966067266599086e-07
+Vd d 0 0.49286728289039355
+Vg g 0 0.0
+Vs s 0 0.977914801450207
+Vb b 0 0.0
+.control
+set numdgt=15
+op
+print i(vd) i(vg) i(vs) i(vb)
+.endc
+.end

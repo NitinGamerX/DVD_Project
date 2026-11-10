@@ -19,10 +19,11 @@ code .                    # open in VS Code (WSL)
 | Path | Contents |
 |------|----------|
 | `model/22nm_MGK.pm` | assigned model file, never edited (sha256 in `model/SHA256SUMS`) |
+| `model/derived/` | generated copy with vth0, toxe, ndep, u0, xj as SPICE parameters (Phase 1) |
 | `docs/` | project document and annotated lecture slides |
 | `reference/22n_NMOS_ON.net` | instructor's example netlist, as received |
 | `config.yaml` | all parameters, ranges, seeds and rules from the document |
-| `src/dvd/` | shared library: config, model-file parser, ngspice runner, netlist builder |
+| `src/dvd/` | shared library: config, model-file parser, sampling, ngspice runner, netlist builder, single-FET simulation |
 | `scripts/NN_*.py` | one script per step, run in numeric order |
 | `netlists/` | example netlists: `single_fet/`, `gates/`, `test_circuit/` (deliverable 2) |
 | `data/` | datasets: `fet/` (four CSVs, deliverable 1), `gates/`, `test_circuit/` |

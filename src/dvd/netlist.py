@@ -7,7 +7,8 @@ from . import config
 
 
 def fmt(x: float) -> str:
-    return f"{x:.12g}"
+    """Shortest text that round-trips the float exactly."""
+    return repr(float(x))
 
 
 def mos_line(name: str, d: str, g: str, s: str, b: str, model: str, w: float) -> str:
@@ -17,6 +18,15 @@ def mos_line(name: str, d: str, g: str, s: str, b: str, model: str, w: float) ->
     area, perim = w * ldiff, 2.0 * (w + ldiff)
     return (f"{name} {d} {g} {s} {b} {model} W={fmt(w)} L={fmt(lmin)} "
             f"AS={fmt(area)} AD={fmt(area)} PS={fmt(perim)} PD={fmt(perim)}")
+
+
+def mos_line_expr(name: str, d: str, g: str, s: str, b: str, model: str, wexpr: str = "w") -> str:
+    """Same device line with W given as a SPICE parameter expression (for batch runs)."""
+    cfg = config.load()
+    lmin, ldiff = fmt(cfg["assignment"]["lmin"]), fmt(cfg["spice"]["ldiff"])
+    return (f"{name} {d} {g} {s} {b} {model} W={{{wexpr}}} L={lmin} "
+            f"AS={{{wexpr}*{ldiff}}} AD={{{wexpr}*{ldiff}}} "
+            f"PS={{2*({wexpr}+{ldiff})}} PD={{2*({wexpr}+{ldiff})}}")
 
 
 def resolve_terminal(expr, vdd: float) -> float:

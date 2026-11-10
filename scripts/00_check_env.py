@@ -7,7 +7,7 @@ Checks
   3. The assigned model file is byte-identical to the one we were given
   4. config.yaml matches the rules of DVD_ML_PROJECT.pdf
   5. Process-parameter nominals can be read from the model file (NMOS and PMOS)
-  6. One single-transistor netlist per case is written to netlists/single_fet/
+  6. One single-transistor netlist per case is written to work/check/ (scratch)
      and simulated: required .options line, own source per terminal,
      source/drain areas present, Kirchhoff sum ~ 0, ON current >> OFF current
 
@@ -118,8 +118,8 @@ for t, key in (("NMOS", "nmos_model"), ("PMOS", "pmos_model")):
         check(False, f"{t} nominals", str(e))
 
 # 6 ---------------------------------------------------------------------------
-section("Single-transistor example netlists (netlists/single_fet/)")
-outdir = config.path("netlists", "single_fet")
+section("Single-transistor smoke test (work/check/)")
+outdir = config.path("work", "check")
 outdir.mkdir(parents=True, exist_ok=True)
 rel_model = Path(os.path.relpath(mf, outdir))
 vdd, temp, w = a["vdd_nominal"], 27.0, 2 * a["lmin"]
