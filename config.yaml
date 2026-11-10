@@ -1,0 +1,102 @@
+# =============================================================================
+# DVD course project: ML-Driven PVT Variation Aware Leakage Estimation
+# Single source of truth for every number the scripts use.
+# Section references (§) are to docs/DVD_ML_PROJECT.pdf.
+# Never hard-code any of these values in a script; read them from here.
+# =============================================================================
+
+# ---- §2 Team assignment ------------------------------------------------------
+assignment:
+  model_file: model/22nm_MGK.pm     # 22nm MGK (metal gate / high-k), PTM BSIM4 level 54
+  vdd_nominal: 1.0                  # V, assigned nominal supply
+  test_circuit: cla3                # 3-bit carry-lookahead adder
+  lmin: 22.0e-9                     # m, channel length = feature size of the node
+  nmos_model: nmos                  # .model names inside the model file
+  pmos_model: pmos
+
+# ---- §4 Parameters to sweep (each drawn independently, uniform) -------------
+# Draw VDD first: the ranges of Vd and Vs depend on it.
+sweep:
+  vdd_rel: [-0.10, 0.10]            # VDD = vdd_nominal * (1 + U[-0.1, 0.1])
+  vd_frac: [0.0, 1.0]               # Vd  = U[0, VDD]
+  vs_frac: [0.0, 1.0]               # Vs  = U[0, VDD]
+  w_mult: [1.0, 8.0]                # W   = U[1, 8] * lmin
+  temp_c: [-40.0, 125.0]            # deg C
+  process_params: [vth0, toxe, ndep, u0, xj]
+  process_rel: [-0.10, 0.10]        # nominal (read from the model file) * (1 + U[-0.1, 0.1])
+  # Separate draws for NMOS and PMOS. Nominals are parsed from the model file,
+  # never typed in here, so they cannot drift from it.
+
+# Gate and body voltages are fixed by the case (§4 table).
+# Values are expressions in VDD.
+cases:
+  nmos_on:  {type: n, vg: VDD, vb: "0"}
+  nmos_off: {type: n, vg: "0", vb: "0"}
+  pmos_on:  {type: p, vg: "0", vb: VDD}
+  pmos_off: {type: p, vg: VDD, vb: VDD}
+
+# ---- §4 Netlist requirements -------------------------------------------------
+# Every netlist (transistor, gate, test circuit) must contain this line verbatim.
+spice:
+  simulator: ngspice
+  options: ".options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9"
+  # Single-transistor netlists: every terminal has its own voltage source.
+  # Source/drain diffusion geometry (team requirement: areas must be included).
+  # Ldiff = 44n is the value defined in the instructor's example netlist.
+  ldiff: 44.0e-9                    # m
+  # AS = AD = W * ldiff ; PS = PD = 2 * (W + ldiff)
+  n_jobs: -1                        # parallel ngspice processes (-1 = all cores)
+
+# ---- §3 Part A: transistor datasets and models -------------------------------
+part_a:
+  samples_per_case: 10000           # may be changed (§3 step 1); report the final number
+  split: [0.70, 0.15, 0.15]         # train / val / test (alternative allowed: 0.8/0.1/0.1)
+  seeds:
+    sampling: {nmos_on: 1101, nmos_off: 1102, pmos_on: 1103, pmos_off: 1104}
+    split: 2024
+    model: 7
+  csv_columns: [vdd, temp, w, vd, vs, vg, vb, vth0, toxe, ndep, u0, xj, id, ig, is, ib]
+  targets: [id, ig, is, ib]
+  n_model_types: 4                  # §6 item 4: 4 model types x 4 cases
+  val_metrics: [r2, median_err, p95_err]
+
+# ---- §3 Part B / §5 Gates ----------------------------------------------------
+part_b:
+  n_corners: 200                    # SPICE reference corners (evaluation only, never training)
+  corner_seed: 5050
+  # One corner = one draw of VDD, T and process parameters (§4 distributions).
+  # All NMOS in a gate share one draw; all PMOS share another.
+  # Gate inputs are applied at exactly 0 or VDD.
+  gates:
+    inv:   {inputs: [a],    internal: []}
+    nand2: {inputs: [a, b], internal: [x]}            # x between the series NMOS
+    nor2:  {inputs: [a, b], internal: [y]}            # y between the series PMOS
+    and2:  {inputs: [a, b], internal: [x, nand_out]}  # NAND2 + INV, simulated as one gate
+    or2:   {inputs: [a, b], internal: [y, nor_out]}   # NOR2 + INV, simulated as one gate
+  # 18 gate/input cases x 200 corners, in both SPICE and ML.
+
+# ---- §3 Part C: test circuit -------------------------------------------------
+part_c:
+  circuit: cla3
+  same_corners_as_part_b: true      # §3 step 6
+  # Every input combination; built from the Part B gate models; gate leakages summed.
+
+# ---- §6 Reporting -----------------------------------------------------------
+reporting:
+  error_metric: "relative error |ML - SPICE| / |SPICE|"
+  target_mean_accuracy: 0.99        # "up to 99 % mean accuracy" (§1)
+  plot_format: png
+  plot_dpi: 200
+
+# ---- Not fixed by the project document: confirm with the TAs ---------------
+# These defaults let work proceed. Every entry is logged in DECISIONS.md;
+# update both files when a TA answers.
+pending_ta:
+  leakage_definition: total_from_vdd_level_sources   # alt: vdd_supply_only (record both regardless)
+  gate_sizing_m:                                     # (W_n, W_p), all within 1..8 x lmin
+    inv:   [44.0e-9, 88.0e-9]
+    nand2: [88.0e-9, 88.0e-9]
+    nor2:  [44.0e-9, 176.0e-9]
+  internal_node_voltages_source: spice              # §3 step 4; ML-solved nodes also reported
+  cla_has_carry_in: true                            # 7 inputs -> 128 combinations
+  current_sign_convention: ngspice_source_branch    # as in the example netlist / sample database

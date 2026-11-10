@@ -1,0 +1,43 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\graphicspath{{../results/}}
+
+\title{ML-Driven PVT Variation Aware Leakage Estimation\\[2pt]
+\large Digital VLSI Design --- Course Project}
+\author{Team members: \textit{(fill in)}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% Section list follows deliverable 10 of DVD_ML_PROJECT.pdf.
+
+\section{Setup}
+\noindent Model file 22nm\_MGK (PTM 22\,nm metal gate / high-$k$, BSIM4), nominal
+$V_{DD} = \SI{1.0}{V}$, test circuit: 3-bit carry-lookahead adder.
+Simulator and version: see \texttt{results/env/environment.txt}.
+
+\section{Data generation}
+\noindent \textit{Sampling, netlists, train/validation/test split, data check.}
+
+\section{Models}
+\noindent \textit{Four model types, hyperparameters, preprocessing, comparison table, final choices.}
+
+\section{Gate results}
+\noindent \textit{Gate results table and parity plot; most and least accurate cases.}
+
+\section{Test-circuit results}
+\noindent \textit{CLA metrics and parity plot, compared with gate-level accuracy.}
+
+\section{Error analysis}
+\noindent \textit{Where the largest errors occur and why.}
+
+\section{Limitations and improvements}
+\noindent \textit{What limits accuracy and what we would change.}
+
+\end{document}

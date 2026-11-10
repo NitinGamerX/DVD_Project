@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.pdf binary
+*.joblib binary
+*.pkl binary
+# keep the instructor's files byte-for-byte as received
+reference/** -text
+model/22nm_MGK.pm -text

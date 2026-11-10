@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "make check",      "type": "shell", "command": "make check",      "group": "test", "problemMatcher": [] },
+    { "label": "make fet-data",   "type": "shell", "command": "make fet-data",   "group": "build", "problemMatcher": [] },
+    { "label": "make data-check", "type": "shell", "command": "make data-check", "group": "build", "problemMatcher": [] },
+    { "label": "make train",      "type": "shell", "command": "make train",      "group": "build", "problemMatcher": [] },
+    { "label": "make all",        "type": "shell", "command": "make all",        "group": "build", "problemMatcher": [] },
+    { "label": "make report",     "type": "shell", "command": "make report",     "group": "build", "problemMatcher": [] }
+  ]
+}

@@ -1,0 +1,16 @@
+.venv
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+# ngspice scratch files
+*.raw
+tmp*.cir
+work/
+# LaTeX build products
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz

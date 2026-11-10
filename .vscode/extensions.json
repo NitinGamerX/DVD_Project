@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-wsl",
+    "ms-python.python",
+    "mechatroner.rainbow-csv",
+    "james-yu.latex-workshop"
+  ]
+}
