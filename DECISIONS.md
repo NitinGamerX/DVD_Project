@@ -16,9 +16,17 @@ update the status here and the value there in the same commit.
 | D8 | Simulator | ngspice 42 (Ubuntu 24.04 package), BSIM4 level 54 from the model file | Default |
 | D9 | Which oxide parameters vary | Only `toxe`, as section 4 lists; `toxp`, `toxm`, `toxref`, `dtox` stay at their model-file values. ngspice already ignores `dtox` for this file (warning on every run, also with the unmodified file). | Follows the document |
 | D10 | Current used for the transistor `is` column when source = drain voltage | Whatever ngspice reports; no special handling (Vd = Vs has probability zero under continuous sampling) | Default |
+| D11 | Kirchhoff pass criterion | \|ΣI\| ≤ 1e-6·Σ\|I\| + 1e-13 A: reltol of the netlist, plus an absolute floor 10× above the worst measured rounding residual and ~100× below the smallest dataset current | Default; reported with full residual statistics |
+| D12 | What "OFF current" means in the trend plots | Current at the physical drain, per µm of effective width (W − 2·wint), from samples with the source side within 5 % of its rail and \|Vds\| ≥ 0.5 VDD; sweeps at \|Vds\| = VDD | Default |
 
 ## Findings from Phase 1
 
 - Batch (alterparam) and literal netlists agree to about 1e-14 relative on Id/Is, so every sampled parameter is applied.
 - Sensitivity at nominal bias, −10 % → +10 % of each parameter: vth0 changes OFF current by 70–77 %, toxe changes gate current by about 90 %, xj changes currents by at most about 1 %.
 - PMOS OFF body current is below the simulator's resolution (about 1e-16 A) in most samples; see `data/fet/README.md`.
+
+## Findings from Phase 2
+
+- All 40,000 samples pass the Kirchhoff check; the worst residual is 1.2e-14 A, a rounding floor rather than a convergence error.
+- OFF current at the drain is partly gate tunnelling: 78 % (NMOS) and 42 % (PMOS) at −40 °C, so the total rises only ×15 and ×9 to 125 °C while the channel part rises ×64 and ×15.
+- Currents scale with effective width W − 2·wint, not drawn width (exactly so for gate current); worth using as a model input in Phase 3.

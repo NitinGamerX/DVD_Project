@@ -1,0 +1,9 @@
+trend,x,case,samples_plotted,spearman_rho,partial_rho,held_fixed,expected_sign,sweep_monotonic,sweep_metric,sweep_metric_value,passed,channel_only_metric
+OFF current,temperature,nmos_off,491,0.7274477681390971,0.746934762861191,|vth0|,+,True,I(125C)/I(-40C) total,14.806767234494211,True,63.76979663413686
+OFF current,temperature,pmos_off,443,0.6623226906057872,0.6984715071464135,|vth0|,+,True,I(125C)/I(-40C) total,8.95679911101144,True,14.675785421912407
+OFF current,|vth0|,nmos_off,491,-0.3700308895104413,-0.4354207653444425,temperature,-,True,"mV of |vth0| per decade, total",115.06818201636982,True,80.96742547762516
+OFF current,|vth0|,pmos_off,443,-0.28849694305809037,-0.404437946529944,temperature,-,True,"mV of |vth0| per decade, total",97.14686114062299,True,82.09930542094722
+gate current,toxe,nmos_on,10000,-0.4431045255630453,-0.6913086356529993,|Vg -,-,True,decades per Å of toxe,0.8176521318467979,True,
+gate current,toxe,nmos_off,10000,-0.5690494752504948,-0.8711848998394371,|Vg -,-,True,decades per Å of toxe,0.7947062275750346,True,
+gate current,toxe,pmos_on,10000,-0.44351819557918193,-0.703826945957547,|Vg -,-,True,decades per Å of toxe,0.7683994685843331,True,
+gate current,toxe,pmos_off,10000,-0.6075589178075892,-0.8924049590948638,|Vg -,-,True,decades per Å of toxe,0.7727172145307772,True,

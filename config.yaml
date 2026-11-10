@@ -47,6 +47,29 @@ spice:
   # AS = AD = W * ldiff ; PS = PD = 2 * (W + ldiff)
   n_jobs: -1                        # parallel ngspice processes (-1 = all cores)
 
+# ---- §6 item 3: data check ----------------------------------------------------
+data_check:
+  # Kirchhoff: |Id+Ig+Is+Ib| <= reltol * (|Id|+|Ig|+|Is|+|Ib|) + abstol_A
+  # reltol matches the netlist .options reltol. abstol_A is set by the simulator's
+  # double-precision floor (worst measured residual ~1.2e-14 A; see
+  # results/data_check/numerical_resolution.csv), 10x above that floor and ~100x
+  # below the smallest leakage current in any dataset (~3e-11 A at the 1st percentile).
+  kirchhoff_reltol: 1.0e-6
+  kirchhoff_abstol_A: 1.0e-13
+  # Trend plots: dataset scatter (+ binned median) with a controlled one-parameter
+  # SPICE sweep overlaid. OFF current = |current at the physical drain|
+  # (higher-potential diffusion for NMOS, lower for PMOS), per micrometre of
+  # effective width W - 2*wint (wint from the model file; gate current scales exactly
+  # with it), from samples at classic OFF bias: the source-side terminal within
+  # off_rail_frac * VDD of its rail (0 for NMOS, VDD for PMOS) and
+  # |Vd - Vs| >= min_vds_frac * VDD. Without the rail condition, body effect and
+  # negative Vgs from a raised source spread the OFF current over decades.
+  off_rail_frac: 0.05
+  min_vds_frac: 0.5
+  sweep_w_mult: 4                   # W = 4 x Lmin (88 nm) for the controlled sweeps
+  sweep_points: 34
+  trend_bins: 12
+
 # ---- §3 Part A: transistor datasets and models -------------------------------
 part_a:
   samples_per_case: 10000           # may be changed (§3 step 1); report the final number

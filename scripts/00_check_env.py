@@ -157,4 +157,4 @@ print(f"\nwrote {env_file.relative_to(config.ROOT)}")
 if failures:
     print(f"\n{len(failures)} check(s) failed: " + "; ".join(failures))
     sys.exit(1)
-print("\nAll checks passed. Environment is ready for Phase 1.")
+print("\nAll checks passed. Environment is ready.")
