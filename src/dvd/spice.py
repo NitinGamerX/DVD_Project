@@ -1,6 +1,7 @@
 """Run ngspice in batch mode and read back printed values."""
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -21,6 +22,26 @@ class SpiceError(RuntimeError):
     pass
 
 
+# ngspice (Ubuntu build) runs BSIM4 with OpenMP and picks its own thread count (2 by
+# default), ignoring OMP_NUM_THREADS. With many ngspice processes at once the paired
+# threads spin while waiting for each other and waste most of the CPU (measured on the
+# project laptop: 16 simultaneous runs took 2.4 s and 55 s of CPU instead of 0.014 s).
+# Our circuits are far too small to gain from threads inside one process; parallelism
+# comes from running many processes. So every run gets one OpenMP thread (.spiceinit in
+# its working folder) and passive waiting (environment) as a backstop.
+_ENV = dict(os.environ, OMP_WAIT_POLICY="passive", OMP_NUM_THREADS="1")
+_SPICEINIT = "* written by src/dvd/spice.py: one OpenMP thread per ngspice process\nset num_threads=1\n"
+
+
+def _ensure_spiceinit(cwd: Path) -> None:
+    f = Path(cwd) / ".spiceinit"
+    if not f.exists():
+        f.write_text(_SPICEINIT)
+    elif "num_threads" not in f.read_text():
+        with f.open("a") as fh:
+            fh.write("\nset num_threads=1\n")
+
+
 def ngspice_binary() -> str:
     exe = shutil.which("ngspice")
     if exe is None:
@@ -37,11 +58,12 @@ def version() -> str:
 def run_deck(deck: str, cwd: Path, timeout: float = 600.0) -> str:
     """Run one deck with `ngspice -b`; return stdout or raise SpiceError."""
     cwd = Path(cwd)
+    _ensure_spiceinit(cwd)
     with tempfile.NamedTemporaryFile("w", suffix=".cir", dir=cwd, delete=False) as f:
         f.write(deck)
         deck_path = Path(f.name)
     try:
-        r = subprocess.run([ngspice_binary(), "-b", str(deck_path)], cwd=cwd,
+        r = subprocess.run([ngspice_binary(), "-b", str(deck_path)], cwd=cwd, env=_ENV,
                            capture_output=True, text=True, timeout=timeout)
     finally:
         deck_path.unlink(missing_ok=True)
