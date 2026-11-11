@@ -1,0 +1,30 @@
+{
+ "generator": "scripts/04_gate_spice.py",
+ "ngspice": "45.2",
+ "model_file_sha256": "1ad7d53a0d794a37269e0a0787c21065e91a897d1faa1653299adb5a835e6156",
+ "param_model_sha256": "7f61236cdbc6668430f6d50d71dd61f25f80aa81f77f684e7b6db7119ca8ab87",
+ "corner_seed": 5050,
+ "n_corners": 200,
+ "corners_sha256": "93ec146ed613b867b0ac7d158bf5ca2625d6a08af162979d760fefd2b17a78e1",
+ "spice_gates_sha256": "0a8c71fb91cf2376af5668d2d851ecd3bd024b011745c88178978a2b92cf907c",
+ "gate_sizing_m": {
+  "inv": [
+   4.4e-08,
+   8.8e-08
+  ],
+  "nand2": [
+   8.8e-08,
+   8.8e-08
+  ],
+  "nor2": [
+   4.4e-08,
+   1.76e-07
+  ]
+ },
+ "operating_points": 3600,
+ "current_convention": "i_* columns: ngspice source branch current (negative = source delivers)",
+ "leakage_definitions": {
+  "leak_total": "current delivered by every source at VDD (supply + inputs at 1)",
+  "leak_vdd": "current delivered by the VDD supply only"
+ }
+}

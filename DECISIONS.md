@@ -13,7 +13,7 @@ update the status here and the value there in the same commit.
 | D5 | Internal node voltages for gate ML prediction | SPICE-recorded voltages (§3 step 4) drive the reported results; ML-solved nodes reported alongside (§5 "from both") | **Ask TA** |
 | D6 | 3-bit CLA structure and carry-in | Built only from INV/NAND2/NOR2/AND2/OR2; carry-in present → 7 inputs, 128 combinations | **Ask TA** |
 | D7 | Sign convention of currents in the CSVs | ngspice source branch current I(Vx), as in the example netlist and the slides' sample database | Default |
-| D8 | Simulator | ngspice 42 (Ubuntu 24.04 package), BSIM4 level 54 from the model file | Default |
+| D8 | Simulator and environment | ngspice 45.2, Python 3.14.4 on the project laptop (WSL2), recorded in `results/env/environment.txt`; development used ngspice 42 / Python 3.12, and the Phase 1 sensitivity table matched to 4 decimals | Settled |
 | D9 | Which oxide parameters vary | Only `toxe`, as section 4 lists; `toxp`, `toxm`, `toxref`, `dtox` stay at their model-file values. ngspice already ignores `dtox` for this file (warning on every run, also with the unmodified file). | Follows the document |
 | D10 | Current used for the transistor `is` column when source = drain voltage | Whatever ngspice reports; no special handling (Vd = Vs has probability zero under continuous sampling) | Default |
 | D11 | Kirchhoff pass criterion | \|ΣI\| ≤ 1e-6·Σ\|I\| + 1e-13 A: reltol of the netlist, plus an absolute floor 10× above the worst measured rounding residual and ~100× below the smallest dataset current | Default; reported with full residual statistics |
@@ -23,6 +23,9 @@ update the status here and the value there in the same commit.
 | D15 | Learning targets | Channel conductance, gate current, body current (sign-safe); Id and Is rebuilt so the four currents sum to zero exactly | Default |
 | D16 | Data for the final model | Training set only (70 %), so the validation numbers stay an honest selection score | Default |
 | D17 | Training hardware | CPU only, one fit per core in parallel; scikit-learn has no GPU support and these models are too small to gain from one | Default |
+| D18 | Order of series transistors | NAND2 pull-down: B on top (output side), A at the bottom; NOR2 pull-up: A at the top (VDD side), B at the bottom; as in the lecture slides' stack examples | Default |
+| D19 | Bodies in gates and the test circuit | NMOS bodies to ground, PMOS bodies to VDD | Standard static CMOS |
+| D20 | Gate corners | 200 corners, seed 5050: VDD, temperature, then NMOS and PMOS process draws; saved in `data/gates/corners.csv` and reused for the test circuit | Follows the document |
 
 ## Findings from Phase 1
 
@@ -43,3 +46,9 @@ update the status here and the value there in the same commit.
 - Training and validation errors are nearly equal: the networks underfit rather than overfit. A larger network (96×3), alpha from 1e-7 to 1e-4 and optimiser restarts did not help; scaling the targets by 100 made it worse (reverted).
 - Id/Is tail errors come from samples where Id is a small difference of large parts (near its sign change); away from those, Id error is ~0.2 % median, ~1.7 % p95 (NMOS OFF).
 - The NMOS OFF body current changes sign around 1e-17 A and dominates that case's pooled p95; relative to each device's largest current the error is under 1 %.
+
+## Findings from Phase 4
+
+- All 3600 gate operating points converge with every output and internal logic node within 0.71 % of VDD of its rail.
+- Stack effect visible: NAND2 at AB = 00 holds x at about 0.1 V; NOR2 at AB = 11 holds y at about 0.9 VDD.
+- The two leakage definitions (D2) differ by up to 14× (NOR2 at AB = 11, median), because inputs held high drive gate tunnelling current into NMOS gates. The TA's answer to D2 decides which one the Phase 5 and 6 results lead with.

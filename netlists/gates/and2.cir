@@ -1,0 +1,46 @@
+* AND2 - static CMOS, transistor level. Inputs a, b; output out; internal x, nand_out
+* Corner 0 of data/gates/corners.csv: VDD = 1.0110811346493778 V, T = 10.862496454295702 C
+* NMOS and PMOS process parameters (all NMOS share one draw, all PMOS another):
+.param vth0_n=0.34353582273888356 toxe_n=6.712821957157436e-10 ndep_n=1.3004308565385886e+19 u0_n=0.019811394386866677 xj_n=7.671548132002497e-09
+.param vth0_p=-0.23813665207957974 toxe_p=6.962237841827625e-10 ndep_p=4.422950590229524e+18 u0_p=0.0023447065789616935 xj_p=6.566561785959514e-09
+.include ../../model/derived/22nm_MGK_param.pm
+.options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9
+.temp 10.862496454295702
+.param in_a=0 in_b=0
+Vdd vdd 0 1.0110811346493778
+Va a 0 {in_a}
+Vb b 0 {in_b}
+mpa nand_out a vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb nand_out b vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb nand_out b x 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna x a 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi out nand_out vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni out nand_out 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+.control
+set numdgt=15
+alterparam in_a=0.0
+alterparam in_b=0.0
+reset
+op
+echo @@inputs 00
+print i(vdd) i(va) i(vb) v(out) v(x) v(nand_out)
+alterparam in_a=0.0
+alterparam in_b=1.0110811346493778
+reset
+op
+echo @@inputs 01
+print i(vdd) i(va) i(vb) v(out) v(x) v(nand_out)
+alterparam in_a=1.0110811346493778
+alterparam in_b=0.0
+reset
+op
+echo @@inputs 10
+print i(vdd) i(va) i(vb) v(out) v(x) v(nand_out)
+alterparam in_a=1.0110811346493778
+alterparam in_b=1.0110811346493778
+reset
+op
+echo @@inputs 11
+print i(vdd) i(va) i(vb) v(out) v(x) v(nand_out)
+.endc
+.end

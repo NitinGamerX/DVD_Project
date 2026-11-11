@@ -42,3 +42,29 @@ def draw_fet_inputs(case: str, n: int, seed: int) -> pd.DataFrame:
     vb = np.array([netlist.resolve_terminal(spec["vb"], v) for v in vdd])
     df = pd.DataFrame(dict(vdd=vdd, temp=temp, w=w, vd=vd, vs=vs, vg=vg, vb=vb, **proc))
     return df[INPUT_COLUMNS]
+
+
+def corner_columns() -> list[str]:
+    names = config.load()["sweep"]["process_params"]
+    return ["vdd", "temp"] + [f"{p}_n" for p in names] + [f"{p}_p" for p in names]
+
+
+def draw_corners(n: int, seed: int) -> pd.DataFrame:
+    """n circuit corners (Part B step 3, also reused in Part C).
+
+    One corner = one draw of VDD, temperature and process parameters, with the
+    section 4 distributions. All NMOS of a circuit share the '_n' draw, all PMOS the
+    '_p' draw. Order of draws: VDD, temperature, NMOS parameters, PMOS parameters.
+    """
+    cfg = config.load()
+    a, s = cfg["assignment"], cfg["sweep"]
+    rng = np.random.default_rng(seed)
+    nom = process_nominals()
+    out = {"vdd": a["vdd_nominal"] * (1.0 + rng.uniform(*s["vdd_rel"], n)),
+           "temp": rng.uniform(*s["temp_c"], n)}
+    for t in ("n", "p"):
+        for p in s["process_params"]:
+            out[f"{p}_{t}"] = nom[t][p] * (1.0 + rng.uniform(*s["process_rel"], n))
+    df = pd.DataFrame(out)[corner_columns()]
+    df.insert(0, "corner", np.arange(n))
+    return df
