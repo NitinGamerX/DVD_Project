@@ -82,6 +82,32 @@ part_a:
   targets: [id, ig, is, ib]
   n_model_types: 4                  # §6 item 4: 4 model types x 4 cases
   val_metrics: [r2, median_err, p95_err]
+  # A SPICE current is scored (relative error) only where it is resolved:
+  # |I| >= score_floor_factor x measured solver noise (numerical_resolution.csv).
+  score_floor_factor: 10
+  # Model selection: every grid point is fitted on the training set and scored on the
+  # validation set; the best configuration of each type gives one row of the
+  # comparison table, and the best type per case is the chosen model (scored once on
+  # the test set). Score = pooled 95th-percentile relative error over Id, Ig, Is, Ib.
+  selection_metric: p95_err_pct
+  learning_curve_sizes: [1000, 2000, 4000]   # plus the full training set
+  model_grid:
+    poly_ridge:
+      degree: [2, 3, 4]
+      alpha: [1.0e-8, 1.0e-5, 1.0e-2]
+    random_forest:
+      n_estimators: [300]
+      min_samples_leaf: [1, 3]
+      max_features: [0.5, 1.0]
+    grad_boost:
+      learning_rate: [0.05, 0.1]
+      max_iter: [1000]
+      max_leaf_nodes: [31, 63]
+    mlp:                            # tanh, L-BFGS, one network per target
+      hidden: [[64, 64, 64], [96, 96, 96]]
+      alpha: [1.0e-6, 1.0e-7]
+      max_iter: [4000]
+      per_target: [true]
 
 # ---- §3 Part B / §5 Gates ----------------------------------------------------
 part_b:

@@ -7,6 +7,7 @@ scikit-learn: 1.9.1
 matplotlib: 3.11.2
 PyYAML: 6.0.3
 joblib: 1.6.0
+threadpoolctl: 3.8.0
 ngspice: 45.2
 model file: model/22nm_MGK.pm sha256=1ad7d53a0d794a37269e0a0787c21065e91a897d1faa1653299adb5a835e6156
 NMOS nominals: vth0=0.3692, toxe=6.5e-10, ndep=1.2e+19, u0=0.0181, xj=7.2e-09

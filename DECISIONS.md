@@ -18,6 +18,11 @@ update the status here and the value there in the same commit.
 | D10 | Current used for the transistor `is` column when source = drain voltage | Whatever ngspice reports; no special handling (Vd = Vs has probability zero under continuous sampling) | Default |
 | D11 | Kirchhoff pass criterion | \|ΣI\| ≤ 1e-6·Σ\|I\| + 1e-13 A: reltol of the netlist, plus an absolute floor 10× above the worst measured rounding residual and ~100× below the smallest dataset current | Default; reported with full residual statistics |
 | D12 | What "OFF current" means in the trend plots | Current at the physical drain, per µm of effective width (W − 2·wint), from samples with the source side within 5 % of its rail and \|Vds\| ≥ 0.5 VDD; sweeps at \|Vds\| = VDD | Default |
+| D13 | Transistor error metric | Relative error, scored only where SPICE resolves the value (≥ 10 × measured noise floor); pooled over Id, Ig, Is, Ib and reported per current; R² on log10\|I\| | Default |
+| D14 | Model selection rule | Lowest validation p95 (pooled), ties by median; test set used once, for the chosen model | Default |
+| D15 | Learning targets | Channel conductance, gate current, body current (sign-safe); Id and Is rebuilt so the four currents sum to zero exactly | Default |
+| D16 | Data for the final model | Training set only (70 %), so the validation numbers stay an honest selection score | Default |
+| D17 | Training hardware | CPU only, one fit per core in parallel; scikit-learn has no GPU support and these models are too small to gain from one | Default |
 
 ## Findings from Phase 1
 
@@ -30,3 +35,11 @@ update the status here and the value there in the same commit.
 - All 40,000 samples pass the Kirchhoff check; the worst residual is 1.2e-14 A, a rounding floor rather than a convergence error.
 - OFF current at the drain is partly gate tunnelling: 78 % (NMOS) and 42 % (PMOS) at −40 °C, so the total rises only ×15 and ×9 to 125 °C while the channel part rises ×64 and ×15.
 - Currents scale with effective width W − 2·wint, not drawn width (exactly so for gate current); worth using as a model input in Phase 3.
+
+## Findings from Phase 3 (development runs; final numbers come from `make train`)
+
+- In a one-setting-per-type run on all four cases, the MLP beat polynomial ridge, random forest and gradient boosting by about 10× in median validation error.
+- One network per target beats one shared network (gate-current error roughly halved, NMOS OFF).
+- Training and validation errors are nearly equal: the networks underfit rather than overfit. A larger network (96×3), alpha from 1e-7 to 1e-4 and optimiser restarts did not help; scaling the targets by 100 made it worse (reverted).
+- Id/Is tail errors come from samples where Id is a small difference of large parts (near its sign change); away from those, Id error is ~0.2 % median, ~1.7 % p95 (NMOS OFF).
+- The NMOS OFF body current changes sign around 1e-17 A and dominates that case's pooled p95; relative to each device's largest current the error is under 1 %.
