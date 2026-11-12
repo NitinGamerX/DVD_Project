@@ -18,6 +18,11 @@ Also computed, to explain the errors:
 
 Outputs: results/gates/gate_predictions.csv (every operating point),
 gate_results.csv/.md (deliverable 6), gate_parity.png (deliverable 7), gate_errors.png.
+
+Options: --models-dir (default models) and --out-dir (default results/gates) run the same
+evaluation with other models into another folder, e.g. the improved models:
+  python scripts/05_gate_ml.py --models-dir models_v2 --out-dir results/gates_v2 --baseline-dir results/gates
+--baseline-dir adds a side-by-side comparison with an earlier run (read only).
 """
 from __future__ import annotations
 
@@ -34,23 +39,34 @@ from dvd import compose, config, fetsim, gates  # noqa: E402
 from dvd.plotting import plt, save  # noqa: E402
 
 cfg = config.load()
-OUT = config.path("results", "gates")
-OUT.mkdir(parents=True, exist_ok=True)
 PRIMARY = "total" if cfg["pending_ta"]["leakage_definition"].startswith("total") else "vdd"
 SECOND = "vdd" if PRIMARY == "total" else "total"
 DEF_LABEL = {"total": "total from every source at VDD", "vdd": "VDD supply only"}
 
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument("--jobs", type=int, default=None, help="parallel ngspice processes for the oracle")
+ap.add_argument("--models-dir", default="models", help="folder with the four transistor models")
+ap.add_argument("--out-dir", default="results/gates", help="folder for this run's outputs")
+ap.add_argument("--baseline-dir", default=None, help="earlier run to compare with (read only)")
 args = ap.parse_args()
+OUT = config.path(*Path(args.out_dir).parts)
+if args.baseline_dir and OUT.resolve() == config.path(*Path(args.baseline_dir).parts).resolve():
+    sys.exit("--out-dir must differ from --baseline-dir (the baseline is never overwritten)")
+if args.models_dir != "models" and OUT.resolve() == config.path("results", "gates").resolve():
+    sys.exit("other models must write to another --out-dir, not results/gates")
+OUT.mkdir(parents=True, exist_ok=True)
+from threadpoolctl import threadpool_limits  # noqa: E402
+threadpool_limits(1)   # thousands of tiny predictions: BLAS threads only add overhead
 failures: list[str] = []
 
 spice = pd.read_csv(config.path("data", "gates", "spice_gates.csv"), dtype={"inputs": str})
 corners = pd.read_csv(config.path("data", "gates", "corners.csv")).set_index("corner")
-models = compose.load_models()
+models = compose.load_models(args.models_dir)
 predict_ml = lambda case, df: models[case].predict(df)                       # noqa: E731
 predict_spice = lambda case, df: fetsim.simulate(case, df, jobs=args.jobs)  # noqa: E731
-print(f"models: " + ", ".join(f"{c} {m.kind} {tuple(m.hp['hidden'])}" for c, m in models.items()))
+print(f"models ({args.models_dir}): " + ", ".join(
+    f"{c} {m.kind} {tuple(m.hp['hidden'])}" + (f" x{m.hp['ensemble_members']}" if "ensemble_members" in m.hp else "")
+    for c, m in models.items()))
 print(f"primary leakage definition: {DEF_LABEL[PRIMARY]} (config pending_ta.leakage_definition)\n")
 
 rows = []
@@ -205,7 +221,24 @@ for d in (PRIMARY, SECOND):
     med, p95, mean = overall(d)
     print(f"{DEF_LABEL[d]:32s}: median {med:.2f} %, p95 {p95:.2f} %, mean {mean:.2f} % "
           f"-> mean accuracy {100 - mean:.2f} %")
-print("\nwrote results/gates/gate_predictions.csv, gate_results.csv/.md (+ _total/_vdd), gate_parity.png, gate_errors.png")
+if args.baseline_dir:
+    bdir = config.path(*Path(args.baseline_dir).parts)
+    base = pd.read_csv(bdir / "gate_predictions.csv", dtype={"inputs": str})
+    key = ["gate", "inputs", "corner"]
+    j = pred.merge(base[key + [f"ml_{d}" for d in ("total", "vdd")]], on=key, suffixes=("", "_base"))
+    lines = [f"# This run ({args.models_dir}) vs baseline ({args.baseline_dir})", "",
+             "| Leakage | Run | Median err | p95 err | Mean err | Mean accuracy | Bias | Max err |", "|---|---|---|---|---|---|---|---|"]
+    print(f"\nComparison with {args.baseline_dir} (same 3600 operating points):")
+    for d in (PRIMARY, SECOND):
+        for name, col in ((f"baseline ({args.baseline_dir})", f"ml_{d}_base"), (f"this run ({args.models_dir})", f"ml_{d}")):
+            sgn = 100 * (j[col] / j[f"spice_{d}"] - 1)
+            e = sgn.abs()
+            lines.append(f"| {DEF_LABEL[d]} | {name} | {e.median():.2f} % | {np.percentile(e, 95):.2f} % | {e.mean():.2f} % | "
+                         f"{100 - e.mean():.2f} % | {sgn.mean():+.2f} % | {e.max():.1f} % |")
+            print(f"  {DEF_LABEL[d]:32s} {name:34s} median {e.median():.2f} %, p95 {np.percentile(e, 95):.2f} %, "
+                  f"mean {e.mean():.2f} % (accuracy {100 - e.mean():.2f} %), bias {sgn.mean():+.2f} %, max {e.max():.1f} %")
+    (OUT / "comparison_with_baseline.md").write_text("\n".join(lines) + "\n")
+print(f"\nwrote {args.out_dir}/gate_predictions.csv, gate_results.csv/.md (+ _total/_vdd), gate_parity.png, gate_errors.png")
 if failures:
     print("\nFAILED: " + "; ".join(failures))
     sys.exit(1)

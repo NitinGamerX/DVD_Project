@@ -45,7 +45,14 @@ make cla-ml       07  CLA leakage from gate models vs SPICE
 make analysis     08  error analysis
 make report           build report/main.pdf
 make all              everything, in order, fixed seeds
+
+make improve          improvement step: extra data + averaged networks (new folders only)
+make gates-ml-v2      Phase 5 with the improved models, compared with the original
 ```
+
+The improvement step writes only to `data/fet_extra/`, `models_v2/`,
+`results/model_selection_v2/` and `results/gates_v2/`; it never modifies the original
+datasets, models or results (it fingerprints them before and after).
 
 ## Rules enforced by the code
 

@@ -109,6 +109,19 @@ part_a:
       max_iter: [4000]
       per_target: [true]
 
+# ---- Improvement step (scripts/03b_improve_models.py) ---------------------------
+# More training data + averaged networks, kept fully separate from the original run:
+# new folders only; data/fet, models, results/model_selection and results/gates are
+# never written (the script fingerprints them before and after). The extra samples
+# use new seeds and go into training only; validation and test are the original sets.
+part_a_improved:
+  extra_samples_per_case: 20000
+  extra_seeds: {nmos_on: 2101, nmos_off: 2102, pmos_on: 2103, pmos_off: 2104}
+  ensemble_members: 5
+  data_dir: data/fet_extra
+  models_dir: models_v2
+  results_dir: results/model_selection_v2
+
 # ---- §3 Part B / §5 Gates ----------------------------------------------------
 part_b:
   n_corners: 200                    # SPICE reference corners (evaluation only, never training)

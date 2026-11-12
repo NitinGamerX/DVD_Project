@@ -1,0 +1,35 @@
+{
+ "cases": {
+  "nmos_on": {
+   "file": "data/fet_extra/nmos_on.csv",
+   "samples": 20000,
+   "seed": 2101,
+   "sha256": "d923d5b8cfe49c015c032fe46c23f60cba162601cfe3ea4bec5c3124e217817b",
+   "seconds": 1.7
+  },
+  "nmos_off": {
+   "file": "data/fet_extra/nmos_off.csv",
+   "samples": 20000,
+   "seed": 2102,
+   "sha256": "77fb5eae961f0cc51895b3bfea782fe36ff04e100d07e99d481952ff03c45de2",
+   "seconds": 1.5
+  },
+  "pmos_on": {
+   "file": "data/fet_extra/pmos_on.csv",
+   "samples": 20000,
+   "seed": 2103,
+   "sha256": "5a41fbebd47bc70c419481809908e2e3b4a29b3560d1a2cc12c2394a99ada4a0",
+   "seconds": 1.5
+  },
+  "pmos_off": {
+   "file": "data/fet_extra/pmos_off.csv",
+   "samples": 20000,
+   "seed": 2104,
+   "sha256": "f25f832cfb0b491fb5396b09263f458073d3903dd8f223a24a1b228e73484930",
+   "seconds": 1.5
+  }
+ },
+ "generator": "scripts/03b_improve_models.py",
+ "ngspice": "45.2",
+ "note": "extra training samples; same distributions as data/fet, different seeds"
+}

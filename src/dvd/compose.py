@@ -29,9 +29,10 @@ from .gates import GND, VDD, Fet
 CASES = ("nmos_on", "nmos_off", "pmos_on", "pmos_off")
 
 
-def load_models() -> dict:
+def load_models(models_dir: str = "models") -> dict:
+    """The four transistor models (FetModel or FetEnsemble) from a models folder."""
     import joblib
-    return {c: joblib.load(config.path("models", f"{c}.joblib")) for c in CASES}
+    return {c: joblib.load(config.path(models_dir, f"{c}.joblib")) for c in CASES}
 
 
 class Circuit:

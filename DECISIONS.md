@@ -28,6 +28,7 @@ update the status here and the value there in the same commit.
 | D20 | Gate corners | 200 corners, seed 5050: VDD, temperature, then NMOS and PMOS process draws; saved in `data/gates/corners.csv` and reused for the test circuit | Follows the document |
 | D21 | Gate leakage from transistor currents | Kirchhoff over the node set grown from the sources through ON transistors (exact; carried by the OFF devices). Checked: exact single-transistor SPICE currents reproduce gate SPICE to 6e-8 for INV/NAND2/NOR2 | Default |
 | D22 | Gate voltage of transistors driven by internal nodes | Read as its logic rail (models know only Vg = 0 or VDD). Leaves a floor of 0.08–0.67 % median error in AND2/OR2 (nand_out / nor_out sit up to ~7 mV off the rail) | Inherent in the four-case method |
+| D23 | Improvement step (Phase 3b) | 20,000 extra samples per case (seeds 2101–2104, `data/fet_extra/`) added to the original 7,000-sample training split; validation and test unchanged; 5 networks per case with the originally chosen configuration, averaged → `models_v2/`. The original 10,000-row datasets, models and results are never modified (checked by file fingerprints). Whether the extra samples count toward deliverable 1 is a TA question | Proposed |
 
 ## Findings from Phase 1
 

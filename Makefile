@@ -30,6 +30,8 @@ help:
 	@echo "make analysis     Phase 7  error analysis for the report"
 	@echo "make report       build report/main.pdf"
 	@echo "make all          everything above, in order"
+	@echo "make improve      improvement step: extra data + averaged networks (new folders only)"
+	@echo "make gates-ml-v2  Phase 5 with the improved models, compared with the original"
 
 setup:
 	./setup.sh
@@ -48,3 +50,12 @@ report:
 
 clean-scratch:
 	rm -rf work/ report/*.aux report/*.log report/*.out report/*.toc report/*.fls report/*.fdb_latexmk
+
+# ---- improvement step: more data + averaged networks (new folders only) ----------------------
+# Never writes data/fet, models, results/model_selection or results/gates.
+.PHONY: improve gates-ml-v2
+improve:
+	$(PY) $(SCRIPTS)/03b_improve_models.py
+
+gates-ml-v2:
+	$(PY) $(SCRIPTS)/05_gate_ml.py --models-dir models_v2 --out-dir results/gates_v2 --baseline-dir results/gates
