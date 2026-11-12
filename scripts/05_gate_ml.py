@@ -105,7 +105,7 @@ for gate in gates.GATE_ORDER:
         print(f"  {gate:6s} {inp:2s}  ML median error {np.median(e):5.2f} %  p95 {np.percentile(e, 95):5.2f} %", flush=True)
 pred = pd.DataFrame(rows)
 pred.to_csv(OUT / "gate_predictions.csv", index=False)
-print(f"\n{len(pred)} operating points in {time.time() - t_all:.0f} s -> results/gates/gate_predictions.csv")
+print(f"\n{len(pred)} operating points in {time.time() - t_all:.0f} s -> {args.out_dir}/gate_predictions.csv")
 
 
 # ---- bookkeeping check: exact transistor currents must reproduce SPICE where gates sit on the rails

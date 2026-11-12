@@ -1,0 +1,26 @@
+{
+ "generator": "scripts/06_cla_spice.py",
+ "ngspice": "45.2",
+ "cells": 39,
+ "transistors": 186,
+ "inputs": [
+  "a0",
+  "a1",
+  "a2",
+  "b0",
+  "b1",
+  "b2",
+  "cin"
+ ],
+ "outputs": [
+  "s0",
+  "s1",
+  "s2",
+  "c3"
+ ],
+ "vectors": 128,
+ "corners": 200,
+ "corners_sha256": "93ec146ed613b867b0ac7d158bf5ca2625d6a08af162979d760fefd2b17a78e1",
+ "spice_cla3_sha256": "896c5d73519c340e91bea54ea5d1f69656370f5dca0e23e7224ce35d3bc0116b",
+ "development_subset": false
+}

@@ -11,7 +11,7 @@ update the status here and the value there in the same commit.
 | D3 | Transistor widths inside gates and the CLA | INV 44/88 nm, NAND2 88/88 nm, NOR2 44/176 nm (W_n/W_p), all within 1–8 × Lmin | **Ask TA** |
 | D4 | Source/drain geometry | AS = AD = W·Ldiff, PS = PD = 2(W + Ldiff), Ldiff = 44 nm (value defined in the example netlist), identical in training and gate/CLA netlists | Team requirement to include areas; formula **ask TA** |
 | D5 | Internal node voltages for gate ML prediction | SPICE-recorded voltages (§3 step 4) drive the reported results; internal nodes also solved by Kirchhoff with the ML models and reported alongside (§5 "from both") | Implemented in Phase 5 |
-| D6 | 3-bit CLA structure and carry-in | Built only from INV/NAND2/NOR2/AND2/OR2; carry-in present → 7 inputs, 128 combinations | **Ask TA** |
+| D6 | 3-bit CLA structure and carry-in | Built only from Part B cells (`src/dvd/cla.py`): g = AND2, p = XOR of 4 NAND2, carries c1–c3 directly from g, p, cin with AND2/OR2 terms, s = p XOR c; carry-in present → 7 inputs, 128 combinations; 39 cells, 186 transistors | Implemented in Phase 6; confirm with TA |
 | D7 | Sign convention of currents in the CSVs | ngspice source branch current I(Vx), as in the example netlist and the slides' sample database | Default |
 | D8 | Simulator and environment | ngspice 45.2, Python 3.14.4 on the project laptop (WSL2), recorded in `results/env/environment.txt`; development used ngspice 42 / Python 3.12, and the Phase 1 sensitivity table matched to 4 decimals | Settled |
 | D9 | Which oxide parameters vary | Only `toxe`, as section 4 lists; `toxp`, `toxm`, `toxref`, `dtox` stay at their model-file values. ngspice already ignores `dtox` for this file (warning on every run, also with the unmodified file). | Follows the document |
@@ -29,6 +29,8 @@ update the status here and the value there in the same commit.
 | D21 | Gate leakage from transistor currents | Kirchhoff over the node set grown from the sources through ON transistors (exact; carried by the OFF devices). Checked: exact single-transistor SPICE currents reproduce gate SPICE to 6e-8 for INV/NAND2/NOR2 | Default |
 | D22 | Gate voltage of transistors driven by internal nodes | Read as its logic rail (models know only Vg = 0 or VDD). Leaves a floor of 0.08–0.67 % median error in AND2/OR2 (nand_out / nor_out sit up to ~7 mV off the rail) | Inherent in the four-case method |
 | D23 | Improvement step (Phase 3b) | 20,000 extra samples per case (seeds 2101–2104, `data/fet_extra/`) added to the original 7,000-sample training split; validation and test unchanged; 5 networks per case with the originally chosen configuration, averaged → `models_v2/`. The original 10,000-row datasets, models and results are never modified (checked by file fingerprints). Whether the extra samples count toward deliverable 1 is a TA question | Proposed |
+| D24 | Circuit leakage from gate models | Total = sum of the cells' total leakages; supply only = that sum minus the current drawn from primary inputs at 1. The plain sum of cells' supply-only leakages is reported as 'naive' (it misses gate current fed by internal nets at 1) | Default |
+| D25 | Models used for Part C | Run twice and reported side by side: original 10,000-sample models (`results/test_circuit/`) and improved models (`results/test_circuit_v2/`); both leakage definitions | Agreed with the team |
 
 ## Findings from Phase 1
 

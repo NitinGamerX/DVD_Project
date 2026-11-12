@@ -1,0 +1,1615 @@
+* 3-bit carry-lookahead adder, transistor level (39 cells, 186 transistors). Inputs a0 a1 a2 b0 b1 b2 cin; outputs s0 s1 s2 c3
+* Corner 0 of data/gates/corners.csv: VDD = 1.0110811346493778 V, T = 10.862496454295702 C
+* NMOS and PMOS process parameters (all NMOS share one draw, all PMOS another):
+.param vth0_n=0.3435358227388835 toxe_n=6.712821957157435e-10 ndep_n=1.3004308565385886e+19 u0_n=0.0198113943868666 xj_n=7.671548132002497e-09
+.param vth0_p=-0.2381366520795797 toxe_p=6.962237841827624e-10 ndep_p=4.422950590229524e+18 u0_p=0.0023447065789616 xj_p=6.566561785959514e-09
+.include ../../model/derived/22nm_MGK_param.pm
+.options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9
+.temp 10.862496454295702
+.param in_a0=0 in_a1=0 in_a2=0 in_b0=0 in_b1=0 in_b2=0 in_cin=0
+Vdd vdd 0 1.0110811346493778
+Va0 a0 0 {in_a0}
+Va1 a1 0 {in_a1}
+Va2 a2 0 {in_a2}
+Vb0 b0 0 {in_b0}
+Vb1 b1 0 {in_b1}
+Vb2 b2 0 {in_b2}
+Vcin cin 0 {in_cin}
+mpa_g0 nand_out_g0 a0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_g0 nand_out_g0 b0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_g0 nand_out_g0 b0 x_g0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_g0 x_g0 a0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_g0 g0 nand_out_g0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_g0 g0 nand_out_g0 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_xp0a xp0_n1 a0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp0a xp0_n1 b0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp0a xp0_n1 b0 x_xp0a 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp0a x_xp0a a0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp0b xp0_n2 a0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp0b xp0_n2 xp0_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp0b xp0_n2 xp0_n1 x_xp0b 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp0b x_xp0b a0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp0c xp0_n3 b0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp0c xp0_n3 xp0_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp0c xp0_n3 xp0_n1 x_xp0c 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp0c x_xp0c b0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp0d p0 xp0_n2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp0d p0 xp0_n3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp0d p0 xp0_n3 x_xp0d 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp0d x_xp0d xp0_n2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_g1 nand_out_g1 a1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_g1 nand_out_g1 b1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_g1 nand_out_g1 b1 x_g1 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_g1 x_g1 a1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_g1 g1 nand_out_g1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_g1 g1 nand_out_g1 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_xp1a xp1_n1 a1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp1a xp1_n1 b1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp1a xp1_n1 b1 x_xp1a 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp1a x_xp1a a1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp1b xp1_n2 a1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp1b xp1_n2 xp1_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp1b xp1_n2 xp1_n1 x_xp1b 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp1b x_xp1b a1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp1c xp1_n3 b1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp1c xp1_n3 xp1_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp1c xp1_n3 xp1_n1 x_xp1c 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp1c x_xp1c b1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp1d p1 xp1_n2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp1d p1 xp1_n3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp1d p1 xp1_n3 x_xp1d 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp1d x_xp1d xp1_n2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_g2 nand_out_g2 a2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_g2 nand_out_g2 b2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_g2 nand_out_g2 b2 x_g2 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_g2 x_g2 a2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_g2 g2 nand_out_g2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_g2 g2 nand_out_g2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_xp2a xp2_n1 a2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp2a xp2_n1 b2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp2a xp2_n1 b2 x_xp2a 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp2a x_xp2a a2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp2b xp2_n2 a2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp2b xp2_n2 xp2_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp2b xp2_n2 xp2_n1 x_xp2b 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp2b x_xp2b a2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp2c xp2_n3 b2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp2c xp2_n3 xp2_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp2c xp2_n3 xp2_n1 x_xp2c 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp2c x_xp2c b2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xp2d p2 xp2_n2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xp2d p2 xp2_n3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xp2d p2 xp2_n3 x_xp2d 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xp2d x_xp2d xp2_n2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_t1 nand_out_t1 p0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_t1 nand_out_t1 cin vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_t1 nand_out_t1 cin x_t1 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_t1 x_t1 p0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_t1 t1 nand_out_t1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_t1 t1 nand_out_t1 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_c1 y_c1 g0 vdd vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mpb_c1 nor_out_c1 t1 y_c1 vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mna_c1 nor_out_c1 g0 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mnb_c1 nor_out_c1 t1 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpi_c1 c1 nor_out_c1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_c1 c1 nor_out_c1 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_t2 nand_out_t2 p1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_t2 nand_out_t2 g0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_t2 nand_out_t2 g0 x_t2 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_t2 x_t2 p1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_t2 t2 nand_out_t2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_t2 t2 nand_out_t2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_t3 nand_out_t3 p1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_t3 nand_out_t3 t1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_t3 nand_out_t3 t1 x_t3 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_t3 x_t3 p1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_t3 t3 nand_out_t3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_t3 t3 nand_out_t3 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_o2 y_o2 t2 vdd vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mpb_o2 nor_out_o2 t3 y_o2 vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mna_o2 nor_out_o2 t2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mnb_o2 nor_out_o2 t3 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpi_o2 o2 nor_out_o2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_o2 o2 nor_out_o2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_c2 y_c2 g1 vdd vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mpb_c2 nor_out_c2 o2 y_c2 vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mna_c2 nor_out_c2 g1 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mnb_c2 nor_out_c2 o2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpi_c2 c2 nor_out_c2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_c2 c2 nor_out_c2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_t4 nand_out_t4 p2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_t4 nand_out_t4 g1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_t4 nand_out_t4 g1 x_t4 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_t4 x_t4 p2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_t4 t4 nand_out_t4 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_t4 t4 nand_out_t4 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_t5 nand_out_t5 p2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_t5 nand_out_t5 t2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_t5 nand_out_t5 t2 x_t5 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_t5 x_t5 p2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_t5 t5 nand_out_t5 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_t5 t5 nand_out_t5 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_t6 nand_out_t6 p2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_t6 nand_out_t6 t3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_t6 nand_out_t6 t3 x_t6 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_t6 x_t6 p2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpi_t6 t6 nand_out_t6 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_t6 t6 nand_out_t6 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_o3a y_o3a g2 vdd vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mpb_o3a nor_out_o3a t4 y_o3a vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mna_o3a nor_out_o3a g2 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mnb_o3a nor_out_o3a t4 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpi_o3a o3a nor_out_o3a vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_o3a o3a nor_out_o3a 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_o3b y_o3b t5 vdd vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mpb_o3b nor_out_o3b t6 y_o3b vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mna_o3b nor_out_o3b t5 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mnb_o3b nor_out_o3b t6 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpi_o3b o3b nor_out_o3b vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_o3b o3b nor_out_o3b 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_c3 y_c3 o3a vdd vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mpb_c3 nor_out_c3 o3b y_c3 vdd pmos W=1.76e-07 L=2.2e-08 AS=7.744e-15 AD=7.744e-15 PS=4.3999999999999997e-07 PD=4.3999999999999997e-07
+mna_c3 nor_out_c3 o3a 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mnb_c3 nor_out_c3 o3b 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpi_c3 c3 nor_out_c3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mni_c3 c3 nor_out_c3 0 0 nmos W=4.4e-08 L=2.2e-08 AS=1.936e-15 AD=1.936e-15 PS=1.76e-07 PD=1.76e-07
+mpa_xs0a xs0_n1 p0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs0a xs0_n1 cin vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs0a xs0_n1 cin x_xs0a 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs0a x_xs0a p0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs0b xs0_n2 p0 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs0b xs0_n2 xs0_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs0b xs0_n2 xs0_n1 x_xs0b 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs0b x_xs0b p0 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs0c xs0_n3 cin vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs0c xs0_n3 xs0_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs0c xs0_n3 xs0_n1 x_xs0c 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs0c x_xs0c cin 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs0d s0 xs0_n2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs0d s0 xs0_n3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs0d s0 xs0_n3 x_xs0d 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs0d x_xs0d xs0_n2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs1a xs1_n1 p1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs1a xs1_n1 c1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs1a xs1_n1 c1 x_xs1a 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs1a x_xs1a p1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs1b xs1_n2 p1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs1b xs1_n2 xs1_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs1b xs1_n2 xs1_n1 x_xs1b 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs1b x_xs1b p1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs1c xs1_n3 c1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs1c xs1_n3 xs1_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs1c xs1_n3 xs1_n1 x_xs1c 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs1c x_xs1c c1 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs1d s1 xs1_n2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs1d s1 xs1_n3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs1d s1 xs1_n3 x_xs1d 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs1d x_xs1d xs1_n2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs2a xs2_n1 p2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs2a xs2_n1 c2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs2a xs2_n1 c2 x_xs2a 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs2a x_xs2a p2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs2b xs2_n2 p2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs2b xs2_n2 xs2_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs2b xs2_n2 xs2_n1 x_xs2b 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs2b x_xs2b p2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs2c xs2_n3 c2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs2c xs2_n3 xs2_n1 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs2c xs2_n3 xs2_n1 x_xs2c 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs2c x_xs2c c2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpa_xs2d s2 xs2_n2 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mpb_xs2d s2 xs2_n3 vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mnb_xs2d s2 xs2_n3 x_xs2d 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+mna_xs2d x_xs2d xs2_n2 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
+.control
+set numdgt=15
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0000000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0000001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0000010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0000011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0000100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0000101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0000110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0000111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0001000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0001001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0001010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0001011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0001100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0001101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0001110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0001111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0010000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0010001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0010010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0010011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0010100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0010101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0010110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0010111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0011000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0011001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0011010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0011011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0011100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0011101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0011110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0011111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0100000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0100001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0100010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0100011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0100100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0100101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0100110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0100111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0101000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0101001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0101010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0101011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0101100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0101101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0101110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0101111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0110000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0110001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0110010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0110011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0110100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0110101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0110110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0110111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0111000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0111001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0111010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0111011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0111100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0111101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 0111110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=0.0
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 0111111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1000000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1000001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1000010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1000011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1000100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1000101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1000110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1000111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1001000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1001001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1001010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1001011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1001100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1001101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1001110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1001111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1010000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1010001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1010010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1010011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1010100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1010101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1010110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1010111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1011000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1011001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1011010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1011011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1011100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1011101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1011110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=0.0
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1011111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1100000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1100001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1100010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1100011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1100100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1100101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1100110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1100111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1101000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1101001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1101010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1101011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1101100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1101101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1101110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=0.0
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1101111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1110000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1110001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1110010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1110011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1110100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1110101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1110110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=0.0
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1110111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1111000
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1111001
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1111010
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=0.0
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1111011
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1111100
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=0.0
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1111101
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=0.0
+reset
+op
+echo @@inputs 1111110
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+alterparam in_a0=1.0110811346493778
+alterparam in_a1=1.0110811346493778
+alterparam in_a2=1.0110811346493778
+alterparam in_b0=1.0110811346493778
+alterparam in_b1=1.0110811346493778
+alterparam in_b2=1.0110811346493778
+alterparam in_cin=1.0110811346493778
+reset
+op
+echo @@inputs 1111111
+print i(vdd) i(va0) i(va1) i(va2) i(vb0) i(vb1) i(vb2) i(vcin) v(g0) v(xp0_n1) v(xp0_n2) v(xp0_n3) v(p0) v(g1) v(xp1_n1) v(xp1_n2) v(xp1_n3) v(p1) v(g2) v(xp2_n1) v(xp2_n2) v(xp2_n3) v(p2) v(t1) v(c1) v(t2) v(t3) v(o2) v(c2) v(t4) v(t5) v(t6) v(o3a) v(o3b) v(c3) v(xs0_n1) v(xs0_n2) v(xs0_n3) v(s0) v(xs1_n1) v(xs1_n2) v(xs1_n3) v(s1) v(xs2_n1) v(xs2_n2) v(xs2_n3) v(s2)
+.endc
+.end

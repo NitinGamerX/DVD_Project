@@ -40,14 +40,15 @@ make data-check   02  Kirchhoff check, trend plots
 make train        03  4 model types x 4 cases, pick best on validation, score on test
 make gates-spice  04  18 gate/input cases x 200 corners (evaluation only)
 make gates-ml     05  gate leakage from transistor models vs SPICE
-make cla-spice    06  3-bit CLA, all input combinations x same 200 corners
-make cla-ml       07  CLA leakage from gate models vs SPICE
+make cla-spice    06  3-bit CLA, all 128 input combinations x the same 200 corners
+make cla-ml       07  CLA leakage from gate models vs SPICE (original models)
 make analysis     08  error analysis
 make report           build report/main.pdf
 make all              everything, in order, fixed seeds
 
 make improve          improvement step: extra data + averaged networks (new folders only)
 make gates-ml-v2      Phase 5 with the improved models, compared with the original
+make cla-ml-v2        Part C ML with the improved models, compared with the original
 ```
 
 The improvement step writes only to `data/fet_extra/`, `models_v2/`,

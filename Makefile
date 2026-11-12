@@ -32,6 +32,7 @@ help:
 	@echo "make all          everything above, in order"
 	@echo "make improve      improvement step: extra data + averaged networks (new folders only)"
 	@echo "make gates-ml-v2  Phase 5 with the improved models, compared with the original"
+	@echo "make cla-ml-v2    Part C ML with the improved models, compared with the original"
 
 setup:
 	./setup.sh
@@ -59,3 +60,7 @@ improve:
 
 gates-ml-v2:
 	$(PY) $(SCRIPTS)/05_gate_ml.py --models-dir models_v2 --out-dir results/gates_v2 --baseline-dir results/gates
+
+.PHONY: cla-ml-v2
+cla-ml-v2:
+	$(PY) $(SCRIPTS)/07_cla_ml.py --models-dir models_v2 --gate-dir results/gates_v2 --out-dir results/test_circuit_v2 --baseline-dir results/test_circuit
