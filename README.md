@@ -49,11 +49,16 @@ make all              everything, in order, fixed seeds
 make improve          improvement step: extra data + averaged networks (new folders only)
 make gates-ml-v2      Phase 5 with the improved models, compared with the original
 make cla-ml-v2        Part C ML with the improved models, compared with the original
+make rail-models      v3: + rail-focused data and extra features (new folders only)
+make gates-ml-v3      Phase 5 with the v3 models, compared with v1 and v2
+make cla-ml-v3        Part C ML with the v3 models, compared with v1 and v2
+make analysis         cross-version error analysis -> results/analysis/
 ```
 
-The improvement step writes only to `data/fet_extra/`, `models_v2/`,
-`results/model_selection_v2/` and `results/gates_v2/`; it never modifies the original
-datasets, models or results (it fingerprints them before and after).
+Model versions: v1 = original (10,000-sample datasets), v2 = + 20,000 extra uniform samples and
+5 averaged networks, v3 = v2 + rail-focused samples and extra features. Each lives in its own
+folders (`models_vN/`, `results/*_vN/`, `data/fet_extra/`, `data/fet_rail/`); every step that
+adds a version fingerprints the earlier ones and checks they are unchanged.
 
 ## Rules enforced by the code
 

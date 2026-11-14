@@ -1,0 +1,35 @@
+{
+ "cases": {
+  "nmos_on": {
+   "file": "data/fet_rail/nmos_on.csv",
+   "samples": 10000,
+   "seed": 3101,
+   "sha256": "79681fe62dd49cb8702cbbbdd3234c6a884f74f76cc327c0bc5dc0ff0255eab5",
+   "both_terminals_within_2mV_of_rail": 0.0928
+  },
+  "nmos_off": {
+   "file": "data/fet_rail/nmos_off.csv",
+   "samples": 10000,
+   "seed": 3102,
+   "sha256": "32c755ba48e46eafff8bdb2427515848994d5af661b99ab9de1e73a9db055b54",
+   "both_terminals_within_2mV_of_rail": 0.0936
+  },
+  "pmos_on": {
+   "file": "data/fet_rail/pmos_on.csv",
+   "samples": 10000,
+   "seed": 3103,
+   "sha256": "54cb7bd65c64741b4291a010618f49e722405c1ac862b7469a34e1d32d4e7574",
+   "both_terminals_within_2mV_of_rail": 0.0898
+  },
+  "pmos_off": {
+   "file": "data/fet_rail/pmos_off.csv",
+   "samples": 10000,
+   "seed": 3104,
+   "sha256": "381112fc3624d84a20469bb6eacf5d149c7f802637728c20074a7679c9405221",
+   "both_terminals_within_2mV_of_rail": 0.0869
+  }
+ },
+ "generator": "scripts/03c_rail_models.py",
+ "ngspice": "45.2",
+ "note": "rail-focused training/evaluation samples (v3); section 4 ranges, Vd/Vs biased toward the rails"
+}

@@ -41,7 +41,7 @@ ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDe
 ap.add_argument("--models-dir", default="models")
 ap.add_argument("--gate-dir", default="results/gates", help="Phase 5 results made with the same models (checked against)")
 ap.add_argument("--out-dir", default="results/test_circuit")
-ap.add_argument("--baseline-dir", default=None, help="earlier Part C ML run to compare with (read only)")
+ap.add_argument("--baseline-dir", action="append", default=[], help="earlier Part C ML run(s) to compare with (read only; repeatable)")
 ap.add_argument("--spice-dir", default="data/test_circuit")
 args = ap.parse_args()
 PRIMARY = "total" if cfg["pending_ta"]["leakage_definition"].startswith("total") else "vdd"
@@ -50,11 +50,10 @@ LABEL = {"total": "total from every source at VDD", "vdd": "VDD supply only"}
 
 PROTECTED = ["model", "data", "models", "models_v2", "results/data_check", "results/model_selection",
              "results/model_selection_v2", "results/gates", "results/gates_v2", "netlists"]
-if args.baseline_dir:
-    PROTECTED.append(args.baseline_dir)
+PROTECTED += [b for b in args.baseline_dir if b not in PROTECTED]
 protect.refuse_overlap([args.out_dir], PROTECTED)
-if args.baseline_dir and Path(args.out_dir).resolve() == Path(args.baseline_dir).resolve():
-    sys.exit("--out-dir must differ from --baseline-dir")
+if any(Path(args.out_dir).resolve() == Path(b).resolve() for b in args.baseline_dir):
+    sys.exit("--out-dir must differ from every --baseline-dir")
 before = protect.fingerprint(PROTECTED)
 OUT = config.path(*Path(args.out_dir).parts)
 OUT.mkdir(parents=True, exist_ok=True)
@@ -121,8 +120,9 @@ for vec in cla.vectors():
                 acc["ml_inputs"] += e[f"ml_pin_{pin}"]
                 acc["sp_inputs"] += e[f"sp_pin_{pin}"]
     inp = "".join(map(str, vec))
+    ones = sum(levels[c.y] for c in cla.instances())
     for k in range(n):
-        rows.append(dict(inputs=inp, corner=int(corners.corner[k]),
+        rows.append(dict(inputs=inp, corner=int(corners.corner[k]), internal_ones=ones,
                          ml_total=acc["ml_total"][k], ml_vdd=acc["ml_total"][k] - acc["ml_inputs"][k],
                          ml_naive_vdd=acc["ml_naive_vdd"][k],
                          floor_total=acc["sp_total"][k], floor_vdd=acc["sp_total"][k] - acc["sp_inputs"][k]))
@@ -132,7 +132,7 @@ if len(pred) != len(spice_cla):
     failures.append(f"only {len(pred)} of {len(spice_cla)} SPICE operating points matched")
 pred = pred.rename(columns={"leak_total": "spice_total", "leak_vdd": "spice_vdd"})
 keep = ["inputs", "A", "B", "cin", "corner", "vdd", "temp", "spice_total", "spice_vdd", "ml_total", "ml_vdd",
-        "ml_naive_vdd", "floor_total", "floor_vdd", "max_net_offset_mV"]
+        "ml_naive_vdd", "floor_total", "floor_vdd", "max_net_offset_mV", "internal_ones"]
 pred[keep].to_csv(OUT / "cla_predictions.csv", index=False)
 
 
@@ -185,6 +185,33 @@ for d in DEFS:
                   f"{r[f'{d}_mean_err_pct']:.2f} % |")
 (OUT / "cla_results.md").write_text("\n".join(md) + "\n")
 
+# ---- analyses (from the teammate's implementation) -------------------------------------------
+from scipy.stats import spearmanr  # noqa: E402
+pred["temp_tercile"] = pd.qcut(pred.temp, 3, labels=["low", "mid", "high"])
+ana = ["", "## Error by temperature (total leakage)", "",
+       "Composition = sum of exact gate SPICE leakages vs the full netlist; ML part = hierarchical ML vs that sum.", "",
+       "| Temperature third | Range (°C) | ML vs SPICE: median err | ML vs SPICE: bias | Composition bias | ML part: median err |",
+       "|---|---|---|---|---|---|"]
+for t, s_ in pred.groupby("temp_tercile", observed=True):
+    e = err(s_.ml_total, s_.spice_total)
+    ana.append(f"| {t} | {s_.temp.min():.0f} – {s_.temp.max():.0f} | {e.abs().median():.2f} % | {e.mean():+.2f} % | "
+               f"{err(s_.floor_total, s_.spice_total).mean():+.2f} % | {err(s_.ml_total, s_.floor_total).abs().median():.2f} % |")
+pv = pred.groupby("inputs").agg(ones=("internal_ones", "first"),
+                                 bias=("ml_total", lambda x: 0)).reset_index()
+pv["bias"] = [err(g.ml_total, g.spice_total).mean() for _, g in pred.groupby("inputs")]
+pv["floor_bias"] = [err(g.floor_total, g.spice_total).mean() for _, g in pred.groupby("inputs")]
+rho, rho_f = spearmanr(pv.ones, pv.bias).statistic, spearmanr(pv.ones, pv.floor_bias).statistic
+ana += ["", f"Bias vs number of internal nets at logic 1 (per input combination): Spearman rho = {rho:+.2f} "
+            f"(composition floor alone: {rho_f:+.2f}). A negative value for the floor means the adder leaks more than its "
+            f"isolated gates when more internal nets sit at 1: those nets drive cell inputs with slightly degraded '1' "
+            f"levels, which the gate models (inputs exactly at the rails) do not see.",
+        f"ML part alone (hierarchical ML vs exact gate SPICE summed): median {err(pred.ml_total, pred.floor_total).abs().median():.2f} %, "
+        f"p95 {np.percentile(err(pred.ml_total, pred.floor_total).abs(), 95):.2f} %."]
+md_text = (OUT / "cla_results.md").read_text().split("\n## Per input combination")
+(OUT / "cla_results.md").write_text(md_text[0].rstrip() + "\n" + "\n".join(ana) + "\n\n## Per input combination"
+                                    + "\n## Per input combination".join(md_text[1:]))
+print("\n".join(a for a in ana if a.startswith("|") or a.startswith("Bias") or a.startswith("ML part")))
+
 # parity plot (deliverable 8) and error per input combination
 fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.4), layout="constrained")
 for ax, d in zip(axes, DEFS):
@@ -227,16 +254,17 @@ for _, r in summary.iterrows():
           f"mean {r.mean_pct:5.2f} % (accuracy {100 - r.mean_pct:.2f} %), bias {r.bias_pct:+.2f} %")
 
 if args.baseline_dir:
-    b = pd.read_csv(config.path(*Path(args.baseline_dir).parts, "cla_summary.csv"))
-    lines = [f"# 3-bit CLA: this run ({args.models_dir}) vs baseline ({args.baseline_dir})", "",
+    runs = [(b, pd.read_csv(config.path(*Path(b).parts, "cla_summary.csv"))) for b in args.baseline_dir] + \
+           [(f"{args.out_dir} (this run, {args.models_dir})", summary)]
+    lines = [f"# 3-bit CLA: this run vs earlier runs", "",
              "| Leakage | Run | Median err | p95 err | Mean err | Mean accuracy | Bias | Max err |", "|---|---|---|---|---|---|---|---|"]
-    print(f"\nComparison with {args.baseline_dir}:")
+    print("\nComparison with earlier runs:")
     for d in DEFS:
-        for name, t in ((f"baseline ({args.baseline_dir})", b), (f"this run ({args.models_dir})", summary)):
+        for name, t in runs:
             r = t[(t.definition == LABEL[d]) & (t.estimate == "ML (hierarchical)")].iloc[0]
             lines.append(f"| {LABEL[d]} | {name} | {r.median_pct:.2f} % | {r.p95_pct:.2f} % | {r.mean_pct:.2f} % | "
                          f"{100 - r.mean_pct:.2f} % | {r.bias_pct:+.2f} % | {r.max_pct:.2f} % |")
-            print(f"  {LABEL[d]:32s} {name:36s} median {r.median_pct:.2f} %, p95 {r.p95_pct:.2f} %, "
+            print(f"  {LABEL[d]:32s} {name:48s} median {r.median_pct:.2f} %, p95 {r.p95_pct:.2f} %, "
                   f"mean {r.mean_pct:.2f} % (accuracy {100 - r.mean_pct:.2f} %)")
     (OUT / "comparison_with_baseline.md").write_text("\n".join(lines) + "\n")
 

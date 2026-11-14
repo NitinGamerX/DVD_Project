@@ -27,12 +27,15 @@ help:
 	@echo "make gates-ml     Phase 5  gate ML prediction + table + parity (deliverables 6, 7)"
 	@echo "make cla-spice    Phase 6  3-bit CLA SPICE reference"
 	@echo "make cla-ml       Phase 6  3-bit CLA ML prediction + metrics (deliverable 8)"
-	@echo "make analysis     Phase 7  error analysis for the report"
+	@echo "make analysis     Phase 7  error analysis across model versions -> results/analysis/"
 	@echo "make report       build report/main.pdf"
 	@echo "make all          everything above, in order"
 	@echo "make improve      improvement step: extra data + averaged networks (new folders only)"
 	@echo "make gates-ml-v2  Phase 5 with the improved models, compared with the original"
 	@echo "make cla-ml-v2    Part C ML with the improved models, compared with the original"
+	@echo "make rail-models  v3: + rail-focused data and extra features (new folders only)"
+	@echo "make gates-ml-v3  Phase 5 with the v3 models, compared with v1 and v2"
+	@echo "make cla-ml-v3    Part C ML with the v3 models, compared with v1 and v2"
 
 setup:
 	./setup.sh
@@ -64,3 +67,14 @@ gates-ml-v2:
 .PHONY: cla-ml-v2
 cla-ml-v2:
 	$(PY) $(SCRIPTS)/07_cla_ml.py --models-dir models_v2 --gate-dir results/gates_v2 --out-dir results/test_circuit_v2 --baseline-dir results/test_circuit
+
+# ---- v3: + rail-focused data and extra features (new folders only) --------------------------
+.PHONY: rail-models gates-ml-v3 cla-ml-v3
+rail-models:
+	$(PY) $(SCRIPTS)/03c_rail_models.py
+
+gates-ml-v3:
+	$(PY) $(SCRIPTS)/05_gate_ml.py --models-dir models_v3 --out-dir results/gates_v3 --baseline-dir results/gates --baseline-dir results/gates_v2
+
+cla-ml-v3:
+	$(PY) $(SCRIPTS)/07_cla_ml.py --models-dir models_v3 --gate-dir results/gates_v3 --out-dir results/test_circuit_v3 --baseline-dir results/test_circuit --baseline-dir results/test_circuit_v2

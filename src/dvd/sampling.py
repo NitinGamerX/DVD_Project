@@ -68,3 +68,35 @@ def draw_corners(n: int, seed: int) -> pd.DataFrame:
     df = pd.DataFrame(out)[corner_columns()]
     df.insert(0, "corner", np.arange(n))
     return df
+
+
+def draw_fet_inputs_rail(case: str, n: int, seed: int, dist: tuple[float, float] = (1e-6, 0.3),
+                         p_near: float = 0.5) -> pd.DataFrame:
+    """Rail-focused samples (improvement step v3): identical to draw_fet_inputs except that
+    Vd and Vs are each, with probability p_near, placed a log-uniform distance dist (V)
+    from a randomly chosen rail (0 or VDD) instead of uniformly in [0, VDD]. Inside a static
+    gate every transistor terminal sits within about 20 uV - 2 mV of a rail, a region that
+    uniform sampling almost never visits."""
+    cfg = config.load()
+    a, s = cfg["assignment"], cfg["sweep"]
+    spec = cfg["cases"][case]
+    rng = np.random.default_rng(seed)
+    vdd = a["vdd_nominal"] * (1.0 + rng.uniform(*s["vdd_rel"], n))
+
+    def terminal():
+        v = vdd * rng.uniform(0.0, 1.0, n)
+        near = rng.uniform(size=n) < p_near
+        d = 10 ** rng.uniform(np.log10(dist[0]), np.log10(dist[1]), n)
+        at_vdd = rng.uniform(size=n) < 0.5
+        return np.where(near, np.where(at_vdd, vdd - d, d), v)
+
+    vd = terminal()
+    vs = terminal()
+    w = a["lmin"] * rng.uniform(*s["w_mult"], n)
+    temp = rng.uniform(*s["temp_c"], n)
+    nom = process_nominals()[spec["type"]]
+    proc = {p: nom[p] * (1.0 + rng.uniform(*s["process_rel"], n)) for p in s["process_params"]}
+    vg = np.array([netlist.resolve_terminal(spec["vg"], v) for v in vdd])
+    vb = np.array([netlist.resolve_terminal(spec["vb"], v) for v in vdd])
+    df = pd.DataFrame(dict(vdd=vdd, temp=temp, w=w, vd=vd, vs=vs, vg=vg, vb=vb, **proc))
+    return df[INPUT_COLUMNS]

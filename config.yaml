@@ -122,6 +122,26 @@ part_a_improved:
   models_dir: models_v2
   results_dir: results/model_selection_v2
 
+# ---- v3 (scripts/03c_rail_models.py): v2 + rail-focused samples + extra features --
+# From the teammate's implementation: rail-focused samples (Vd, Vs each with p = 0.5 a
+# log-uniform distance 1 uV - 0.3 V from a random rail) and extra physics features
+# (1000/T, junction reverse-bias terms, tanh(Vds/Vt), log gate-to-diffusion distances).
+# Prototype (single network): these helped; their phi(Vds) channel target did not with
+# our network, so v3 keeps the conductance target. New folders only; v1/v2 untouched.
+part_a_rail:
+  samples_per_case: 10000
+  seeds: {nmos_on: 3101, nmos_off: 3102, pmos_on: 3103, pmos_off: 3104}
+  distance_V: [1.0e-6, 0.3]
+  p_near: 0.5
+  split: [0.70, 0.15, 0.15]       # rail data split too: train part used, val/test reported
+  split_seed: 3024
+  ensemble_members: 5
+  channel_target: g               # conductance (as v1/v2)
+  extra_features: true
+  data_dir: data/fet_rail
+  models_dir: models_v3
+  results_dir: results/model_selection_v3
+
 # ---- §3 Part B / §5 Gates ----------------------------------------------------
 part_b:
   n_corners: 200                    # SPICE reference corners (evaluation only, never training)

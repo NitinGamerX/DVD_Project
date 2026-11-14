@@ -181,3 +181,45 @@ class Circuit:
             v1 = self._bisect(outer, iters)
             return {u1: v1, u2: inner(v1)}
         raise ValueError("solve_nodes handles at most two unknown nodes")
+
+    # ---- from the teammate's implementation ------------------------------------------------
+    def power_terms(self, J: np.ndarray, V: dict | None = None) -> dict[str, np.ndarray]:
+        """Static power balance divided by VDD, split by mechanism:
+            I = (1/VDD) * sum_devices [ Jd (Vd - Vs) + Jg (Vg - Vs) + Jb (Vb - Vs) ]
+        (J = current into each terminal; uses Jd + Jg + Js + Jb = 0 per device). With node
+        voltages and currents that satisfy Kirchhoff at every node, and every source at
+        exactly 0 or VDD, this equals the current delivered by the sources at VDD (the total
+        leakage) exactly. The three parts are the channel, gate-tunnelling and body/junction
+        shares of the leakage."""
+        V = V or self.V
+        parts = {"channel": np.zeros(self.n), "gate": np.zeros(self.n), "body": np.zeros(self.n)}
+        for k, f in enumerate(self.fets):
+            vs = V[f.s]
+            parts["channel"] += J[:, k, 0] * (V[f.d] - vs)
+            parts["gate"] += J[:, k, 1] * (V[f.g] - vs)
+            parts["body"] += J[:, k, 3] * (V[f.b] - vs)
+        parts = {k: v / self.vdd for k, v in parts.items()}
+        parts["total"] = parts["channel"] + parts["gate"] + parts["body"]
+        return parts
+
+    def solve_all_nodes(self, predict, internal: list[str], out: str = "out", passes: int = 2) -> dict[str, np.ndarray]:
+        """Fully SPICE-free gate: the output AND the internal nodes from Kirchhoff with the
+        transistor models (starting from the output at its logic rail). One or two unknowns
+        in total are solved jointly (nested bisection); with three (AND2 / OR2: x, nand_out /
+        nor_out, out) the internal pair and the output are solved alternately, `passes` times;
+        the output is only weakly coupled to them (through the inverter's gate current)."""
+        unknown = list(internal) + [out]
+        if len(unknown) <= 2:
+            return self.solve_nodes(predict, unknown)
+        saved = dict(self.V)
+        try:
+            self.V[out] = np.where(self.levels[out], self.vdd, 0.0)
+            sol: dict[str, np.ndarray] = {}
+            for _ in range(passes):
+                sol.update(self.solve_nodes(predict, list(internal)))
+                self.V.update(sol)
+                sol.update(self.solve_nodes(predict, [out]))
+                self.V.update(sol)
+            return {u: sol[u] for u in unknown}
+        finally:
+            self.V = saved
