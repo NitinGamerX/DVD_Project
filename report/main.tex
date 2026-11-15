@@ -179,6 +179,10 @@
         {\scriptsize \href{mailto:vidvathama.babu@research.iiit.ac.in}{vidvathama.babu@research.iiit.ac.in}}
     \end{minipage}
 
+    \vspace{0.9cm}
+
+    \textbf{GitHub Repo:} \href{https://github.com/NitinGamerX/DVD_Project}{https://github.com/NitinGamerX/DVD\_Project}
+
     \vfill
 
 \end{titlepage}
@@ -188,108 +192,36 @@
 \newpage
 
 % ==========================================
-% SECTION 1: INTRODUCTION AND SETUP
+% SECTION 1: SETUP
 % ==========================================
 \addtocontents{toc}{\protect\thispagestyle{tocpage}}
 \section{Setup}
-\label{sec:intro}
+\label{sec:setup}
 
-\keepspace{14\baselineskip}
-\subsection{Problem Statement}
-\noindent\textbf{Problem Statement:} ML-Driven PVT Variation Aware Leakage Estimation.
-
-\medskip
-\noindent\textbf{Description:} Static (leakage) current in nanometre CMOS depends strongly on process, supply voltage and temperature (PVT). Characterizing it with full SPICE simulation at every PVT corner and every input combination is accurate but expensive. This project replaces those simulations with machine-learning (ML) models. Single NMOS and PMOS transistors are simulated in their ON and OFF states at randomly drawn PVT conditions and terminal voltages, and four ML models are trained to predict each terminal current ($I_d$, $I_g$, $I_s$, $I_b$). Using only these four models, the leakage of the INV, NAND2, NOR2, AND2 and OR2 gates is predicted for every input combination at 200 random PVT corners and compared with SPICE simulations of the gates' transistor netlists. The same method is then applied hierarchically to a 3-bit carry-lookahead adder (CLA), whose leakage is built from the gate models and compared with a SPICE simulation of the complete transistor-level netlist. The accuracy target is a mean accuracy of up to 99\,\%.
-
-\keepspace{359pt}
-\subsection{Assigned Configuration and Environment}
-\noindent Table~\ref{tab:setup} lists the configuration assigned to the team and the software used. All numerical values used by the code are kept in a single configuration file (\texttt{config.yaml}), and every script reads them from there.
+\noindent The project replaces SPICE leakage simulation with machine-learning (ML) models. Four models, one per transistor case (NMOS ON, NMOS OFF, PMOS ON, PMOS OFF), predict the four terminal currents of a single transistor under process, voltage and temperature (PVT) variation. From these models alone, the leakage of the INV, NAND2, NOR2, AND2 and OR2 gates and of the assigned test circuit is predicted and compared with SPICE. Table~\ref{tab:setup} lists the assigned configuration and the software used.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{4.6cm}|L|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{4.4cm}|L|}
 \hline
 \textbf{Item} & \textbf{Value} \\
 \hline
 Model file & PTM 22\,nm metal-gate / high-$k$ (\texttt{22nm\_MGK.pm}), BSIM4 level 54 \\
 \hline
-Nominal supply $V_{DD}$ & 1.0\,V, sampled uniformly in $[0.9, 1.1]$\,V \\
+Nominal supply $V_{DD}$ & 1.0\,V \\
 \hline
-Channel length $L$ & 22\,nm (feature size of the node) \\
+Test circuit & 3-bit carry-lookahead adder (CLA) with carry-in: 7 inputs, 128 input combinations \\
 \hline
-Widths & $W \in [1, 8] \times L_{\min} = [22, 176]$\,nm \\
+Simulator & ngspice 45.2 \\
 \hline
-Source/drain geometry & $AS = AD = W \cdot L_{\text{diff}}$, $PS = PD = 2(W + L_{\text{diff}})$, $L_{\text{diff}} = 44$\,nm \\
+Transistor geometry & $L = 22$\,nm, $W \in [1, 8] \times L_{\min}$; $AS = AD = W \cdot 44$\,nm, $PS = PD = 2(W + 44\,\text{nm})$ \\
 \hline
-Test circuit & 3-bit carry-lookahead adder with carry-in (7 inputs, 128 input combinations) \\
-\hline
-Simulator & ngspice 45.2 (KLU solver), batch mode, one OpenMP thread per process \\
-\hline
-Software & Python 3.14.4, NumPy 2.5.4, pandas 3.0.6, SciPy 1.18.1, scikit-learn 1.9.1, Matplotlib 3.11.2 \\
-\hline
-Platform & WSL2 (Ubuntu) on an Intel i7-14700HX laptop, 24 logical processors \\
+ML software & Python 3.14.4, scikit-learn 1.9.1, NumPy 2.5.4, pandas 3.0.6 \\
 \hline
 \end{tabularx}
-\caption{Assigned configuration and software environment.}
+\caption{Assigned configuration and software.}
 \label{tab:setup}
-\end{table}
-
-\noindent ngspice evaluates BSIM4 devices with OpenMP and selects its own thread count. When many ngspice processes run concurrently, the paired threads spin while waiting for each other: 16 simultaneous runs consumed 55\,s of CPU time in 2.4\,s instead of 0.014\,s. Every simulation therefore runs single-threaded (\texttt{set num\_threads=1}), and parallelism comes from running many independent ngspice processes. Results are bit-identical with and without this setting.
-
-\keepspace{331pt}
-\subsection{Approach Overview}
-\noindent The work is organized as a pipeline in which every stage reads the outputs of earlier stages and never modifies them (Figure~\ref{fig:pipeline}). The SPICE references for the gates and the adder are produced once and are used only for evaluation; no gate- or circuit-level SPICE result is ever used for training.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[
-    stage/.style={rectangle, rounded corners=3pt, draw, thick, fill=stagefill, align=center, font=\small, minimum width=3.6cm, minimum height=1.2cm},
-    ref/.style={rectangle, rounded corners=3pt, draw, thick, dashed, align=center, font=\small, minimum width=3.6cm, minimum height=1.2cm},
-    arr/.style={-{Stealth[length=2.5mm]}, thick},
-    scale=0.92, transform shape
-]
-\node[stage] (p1) at (0,0)     {\textbf{Transistor data}\\ ngspice, 4 cases};
-\node[stage] (p2) at (5.0,0)   {\textbf{Data check}\\ Kirchhoff, trends};
-\node[stage] (p3) at (10.0,0)  {\textbf{Transistor models}\\ v1 $\rightarrow$ v2 $\rightarrow$ v3};
-\node[ref]   (p4) at (0,-2.7)  {\textbf{Gate SPICE}\\ 18 cases $\times$ 200};
-\node[stage] (p5) at (5.0,-2.7){\textbf{Gate ML}\\ Part B};
-\node[ref]   (p6) at (0,-5.4)  {\textbf{CLA SPICE}\\ 128 inputs $\times$ 200};
-\node[stage] (p7) at (5.0,-5.4){\textbf{CLA ML}\\ Part C};
-\node[stage] (p8) at (10.0,-4.05){\textbf{Error analysis}\\ all versions};
-\draw[arr] (p1) -- (p2);
-\draw[arr] (p2) -- (p3);
-\draw[arr] (p3.south) |- node[pos=0.25, right, font=\scriptsize] {models} (p5.east);
-\draw[arr] (p4) -- node[above, font=\scriptsize, align=center] {node\\voltages} (p5);
-\draw[arr] (p5) -- node[right, font=\scriptsize] {gate models} (p7);
-\draw[arr] (p6) -- node[above, font=\scriptsize] {reference} (p7);
-\draw[arr] (p5.south east) -- (p8.north west);
-\draw[arr] (p7.north east) -- (p8.south west);
-\end{tikzpicture}
-\caption{Project pipeline. Solid boxes produce ML results; dashed boxes are SPICE references used only for evaluation.}
-\label{fig:pipeline}
-\end{figure}
-
-\keepspace{270pt}
-\subsection{Model Versions}
-\noindent The transistor models were developed in three successive versions. Each version keeps the data, models and results of the previous ones unchanged, so that every improvement can be measured on identical evaluation data. Table~\ref{tab:versions} summarizes them; Section~\ref{sec:models} describes each in detail.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|c|L|>{\centering\arraybackslash}p{2.4cm}|>{\centering\arraybackslash}p{2.2cm}|L|}
-\hline
-\textbf{Version} & \textbf{Training data per case} & \textbf{Training samples} & \textbf{Networks averaged} & \textbf{Model inputs} \\
-\hline
-v1 & Uniform samples (section~4 distributions) & 7,000 & 1 & 10 base features \\
-\hline
-v2 & v1 + 20,000 additional uniform samples & 27,000 & 5 & 10 base features \\
-\hline
-v3 & v2 + 7,000 rail-focused samples & 34,000 & 5 & 10 base + 7 physics features \\
-\hline
-\end{tabularx}
-\caption{The three model versions. All versions are evaluated on the same validation and test sets.}
-\label{tab:versions}
 \end{table}
 
 % ==========================================
@@ -300,248 +232,108 @@ v3 & v2 + 7,000 rail-focused samples & 34,000 & 5 & 10 base + 7 physics features
 \section{Data Generation}
 \label{sec:data}
 
-\keepspace{269pt}
+\keepspace{251pt}
 \subsection{Sampling}
-\noindent For each of the four cases (NMOS ON, NMOS OFF, PMOS ON, PMOS OFF), every sample draws all parameters independently from the distributions in Table~\ref{tab:sampling}, with $V_{DD}$ drawn first because the ranges of $V_d$ and $V_s$ depend on it. The gate and body voltages are fixed by the case (Table~\ref{tab:cases}). Each case uses its own fixed random seed.
+\noindent For each case, every sample draws all inputs independently from the distributions in Table~\ref{tab:sampling}, with $V_{DD}$ drawn first because the ranges of $V_d$ and $V_s$ depend on it. The gate and body voltages are fixed by the case: $V_g = V_{DD}$ for NMOS ON and PMOS OFF and 0 otherwise; $V_b = 0$ for NMOS and $V_{DD}$ for PMOS. Each case uses its own fixed random seed.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{4.4cm}|L|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{4.6cm}|L|}
 \hline
-\textbf{Parameter} & \textbf{Distribution} \\
+\textbf{Input} & \textbf{Distribution} \\
 \hline
 $V_{DD}$ & Uniform, $1.0\,\text{V} \pm 10\,\%$ \\
 \hline
-Drain voltage $V_d$, source voltage $V_s$ & Uniform, $[0, V_{DD}]$ (each independently) \\
+$V_d$, $V_s$ & Uniform, $[0, V_{DD}]$, independently \\
 \hline
 Width $W$ & Uniform, $[1, 8] \times L_{\min}$ \\
 \hline
 Temperature & Uniform, $[-40, 125]\,^{\circ}$C \\
 \hline
-\texttt{vth0}, \texttt{toxe}, \texttt{ndep}, \texttt{u0}, \texttt{xj} & Uniform, nominal value from the model file $\pm 10\,\%$; separate values for NMOS and PMOS \\
+\texttt{vth0}, \texttt{toxe}, \texttt{ndep}, \texttt{u0}, \texttt{xj} & Uniform, nominal value of the model file $\pm 10\,\%$ \\
 \hline
 \end{tabularx}
-\caption{Sampling distributions (section 4 of the project document).}
+\caption{Sampling distributions.}
 \label{tab:sampling}
 \end{table}
 
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{0.7\linewidth}{|L|c|c|}
-\hline
-\textbf{Case} & \textbf{Gate voltage} & \textbf{Body voltage} \\
-\hline
-NMOS ON & $V_{DD}$ & 0 \\
-\hline
-NMOS OFF & 0 & 0 \\
-\hline
-PMOS ON & 0 & $V_{DD}$ \\
-\hline
-PMOS OFF & $V_{DD}$ & $V_{DD}$ \\
-\hline
-\end{tabularx}
-\caption{Gate and body voltages of the four transistor cases.}
-\label{tab:cases}
-\end{table}
-
-\noindent The nominal process values are read directly from the model file: NMOS \texttt{vth0} = 0.3692\,V, \texttt{toxe} = 6.5\,\AA, \texttt{ndep} = $1.2\times10^{19}$\,cm$^{-3}$, \texttt{u0} = 0.0181\,m$^2$/Vs, \texttt{xj} = 7.2\,nm; PMOS \texttt{vth0} = $-0.25399$\,V, \texttt{toxe} = 6.7\,\AA, \texttt{ndep} = $4.4\times10^{18}$\,cm$^{-3}$, \texttt{u0} = 0.0023\,m$^2$/Vs, \texttt{xj} = 7.2\,nm.
-
-\keepspace{393pt}
-\subsection{Single-Transistor Netlists}
-\noindent Each sample is simulated with a single-transistor netlist in which every terminal has its own voltage source, and the source and drain areas and perimeters are specified explicitly. Every netlist in the project contains the mandatory options line. The example netlist for the NMOS OFF case, which reproduces the first row of its dataset, is shown below; the process parameters enter as SPICE parameters of a copy of the model file in which only \texttt{vth0}, \texttt{toxe}, \texttt{ndep}, \texttt{u0} and \texttt{xj} are parametrized.
+\keepspace{220pt}
+\subsection{Netlists}
+\noindent Each sample is simulated with a single-transistor netlist in which every terminal has its own voltage source and the source and drain areas and perimeters are specified. The five process parameters enter as SPICE parameters of a copy of the model file in which only they are parametrized. The structure is:
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}
-* Single-transistor netlist, case NMOS_OFF (Vg=0, Vb=0)
-* Reproduces sample 0 of data/fet/nmos_off.csv
-.param vth0_n=0.3644545298223401 toxe_n=6.508913679724983e-10 ndep_n=1.2620288343074083e+19 u0_n=0.01802521453117838 xj_n=7.89338905829229e-09
-.param vth0_p=-0.25399 toxe_p=6.7e-10 ndep_p=4.4e+18 u0_p=0.0023 xj_p=7.2e-09
-.include ../../model/derived/22nm_MGK_param.pm
+.include 22nm_MGK_param.pm   * model file; vth0, toxe, ndep, u0, xj as .param
 .options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9
-.temp 44.57138403821263
-* VDD = 1.0087023608563213 V
-M1 d g s b nmos W=1.6083033633299543e-07 L=2.2e-08 AS=7.076534798651799e-15 AD=7.076534798651799e-15 PS=4.0966067266599086e-07 PD=4.0966067266599086e-07
-Vd d 0 0.49286728289039355
-Vg g 0 0.0
-Vs s 0 0.977914801450207
-Vb b 0 0.0
-.control
-set numdgt=15
-op
-print i(vd) i(vg) i(vs) i(vb)
-.endc
-.end
+.temp {T}
+M1 d g s b nmos W={W} L=22n AS={W*44n} AD={W*44n} PS={2*(W+44n)} PD={2*(W+44n)}
+Vd d 0 {Vd}
+Vg g 0 {Vg}
+Vs s 0 {Vs}
+Vb b 0 {Vb}
+.op
 \end{lstlisting}
 \end{minipage}
 
-\noindent The recorded currents are the ngspice source branch currents $I(V_d)$, $I(V_g)$, $I(V_s)$, $I(V_b)$: a positive value is current flowing out of the device terminal into its source, which is the convention of the reference sample database. Large batches are simulated by updating parameters inside one ngspice process (\texttt{alterparam}, \texttt{reset}, \texttt{op}); a random subset of every batch is re-simulated through independent stand-alone netlists, and the two agree to within $10^{-14}$ relative on $I_d$ and $I_s$.
-
-\keepspace{286pt}
-\subsection{Datasets and Split}
-\noindent Table~\ref{tab:datasets} lists all datasets. The four deliverable datasets contain exactly 10,000 rows each with the columns \texttt{vdd, temp, w, vd, vs, vg, vb, vth0, toxe, ndep, u0, xj, id, ig, is, ib}. Each is split randomly with a fixed seed into training (70\,\%, 7,000 samples), validation (15\,\%, 1,500) and test (15\,\%, 1,500) sets. These validation and test sets are used to evaluate all three model versions.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.6cm}|>{\centering\arraybackslash}p{2.2cm}|L|L|}
-\hline
-\textbf{Dataset} & \textbf{Rows per case} & \textbf{Sampling} & \textbf{Use} \\
-\hline
-Deliverable datasets & 10,000 & Uniform (Table~\ref{tab:sampling}) & 70/15/15 split; training (all versions), validation, test \\
-\hline
-Additional uniform & 20,000 & Uniform, new seeds & Training only (v2, v3) \\
-\hline
-Rail-focused & 10,000 & Rail-focused (Section~\ref{sec:rail}) & 70/15/15 split; training (v3), rail validation and test sets \\
-\hline
-\end{tabularx}
-\caption{Datasets. All rows satisfy the section 4 parameter ranges.}
-\label{tab:datasets}
-\end{table}
+\noindent The recorded currents are the source branch currents $I(V_d)$, $I(V_g)$, $I(V_s)$, $I(V_b)$. Gate and test-circuit netlists use the same model card, options line and diffusion geometry, with one source per primary input.
 
 \keepspace{14\baselineskip}
-\subsection{Rail-Focused Samples}
-\label{sec:rail}
-\noindent Inside a static CMOS gate every transistor terminal sits within a few millivolts of a supply rail, and many transistors have one terminal at each rail. Uniform sampling of $V_d$ and $V_s$ rarely visits this region: only 0.4\,\% of uniform terminals lie within 2\,mV of a rail. In the rail-focused samples, $V_d$ and $V_s$ are each, with probability 0.5, placed a log-uniform distance between 1\,$\mu$V and 0.3\,V from a randomly chosen rail; all other parameters follow Table~\ref{tab:sampling}. This places 30\,\% of terminals within 2\,mV of a rail, and 9\,\% of samples have both terminals within 2\,mV of a rail. The deliverable datasets are unchanged; the rail-focused samples are additional training and evaluation data.
+\subsection{Data Split}
+\noindent Each of the four datasets has 10,000 rows and is split randomly with a fixed seed into training (70\,\%, 7,000 rows), validation (15\,\%, 1,500) and test (15\,\%, 1,500) sets. The validation set is used only for model selection and the test set only for the final evaluation of the chosen models.
 
-\keepspace{302pt}
-\subsection{Data Check: Kirchhoff's Current Law}
-\noindent For every sample the four terminal currents must sum to zero. The tolerance combines the solver's relative tolerance with an absolute floor set by double-precision rounding:
-\begin{equation}
-    \left| I_d + I_g + I_s + I_b \right| \;\le\; 10^{-6}\left(|I_d|+|I_g|+|I_s|+|I_b|\right) + 10^{-13}\,\text{A}.
-\end{equation}
+\medskip
+\noindent Inside a gate, every transistor terminal sits within a few millivolts of a rail, a region that uniform sampling of $V_d$ and $V_s$ rarely visits (0.4\,\% of terminals lie within 2\,mV of a rail). The improved models (Section~\ref{sec:improved}) therefore also use additional training data: 20,000 further uniform samples per case, and 10,000 \emph{rail-focused} samples per case in which $V_d$ and $V_s$ are each, with probability 0.5, placed a log-uniform distance of 1\,$\mu$V to 0.3\,V from a rail. The rail-focused samples are split 70/15/15 in the same way, giving a separate rail validation and test set.
 
-\noindent The absolute floor is ten times the largest residual observed and about one hundred times below the smallest leakage current in any dataset. All 40,000 samples pass (Table~\ref{tab:kcl}). The residuals do not grow with current magnitude (Figure~\ref{fig:kcl}): they are rounding noise rather than incomplete convergence. They are smallest for NMOS OFF, where the gate, body and source sit at or near 0\,V.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|L|c|c|c|c|}
-\hline
-\textbf{Case} & \textbf{Passed} & \textbf{Median $|\Sigma I|$ (A)} & \textbf{Max $|\Sigma I|$ (A)} & \textbf{Max $|\Sigma I| / \Sigma |I|$} \\
-\hline
-NMOS ON & 10,000 / 10,000 & $8.8\times10^{-17}$ & $1.8\times10^{-15}$ & $2.3\times10^{-5}$ \\
-\hline
-NMOS OFF & 10,000 / 10,000 & $4.4\times10^{-24}$ & $5.6\times10^{-22}$ & $8.7\times10^{-15}$ \\
-\hline
-PMOS ON & 10,000 / 10,000 & $8.7\times10^{-18}$ & $1.1\times10^{-16}$ & $1.2\times10^{-6}$ \\
-\hline
-PMOS OFF & 10,000 / 10,000 & $3.9\times10^{-16}$ & $1.2\times10^{-14}$ & $4.4\times10^{-5}$ \\
-\hline
-\end{tabularx}
-\caption{Kirchhoff check of the four deliverable datasets.}
-\label{tab:kcl}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.78\linewidth]{data_check/kirchhoff.png}
-\caption{Kirchhoff residual versus the sum of current magnitudes for every sample; the dashed line is the tolerance.}
-\label{fig:kcl}
-\end{figure}
-
-\noindent The simulator's numerical resolution of each current was measured by re-simulating samples with inputs perturbed by $10^{-13}$ (relative), which leaves the physics unchanged (Table~\ref{tab:noise}). Every current is resolved far below its smallest value except the PMOS OFF body current, which is resolved only in steps of about $3.5\times10^{-18}$\,A and lies below $10^{-15}$\,A in 71\,\% of samples. Relative errors are therefore scored only where a SPICE value exceeds ten times its measured noise (Section~\ref{sec:metrics}).
+\keepspace{205pt}
+\subsection{Data Check}
+\noindent For every sample the four terminal currents must sum to zero within the solver tolerance, $|\Sigma I| \le 10^{-6}\,\Sigma|I| + 10^{-13}$\,A. All 40,000 samples pass (Table~\ref{tab:kcl}); the residuals are double-precision rounding noise.
 
 \begin{table}[H]
 \centering
 \small
 \begin{tabularx}{\linewidth}{|L|c|c|c|}
 \hline
-\textbf{Case} & \textbf{$I_d$, $I_s$ noise (A)} & \textbf{$I_g$ noise (A)} & \textbf{$I_b$ noise (A)} \\
+\textbf{Case} & \textbf{Passed} & \textbf{Median $|\Sigma I|$ (A)} & \textbf{Max $|\Sigma I|$ (A)} \\
 \hline
-NMOS ON & $\sim5\times10^{-17}$ & $\sim9\times10^{-16}$ & $\sim1\times10^{-20}$ \\
+NMOS ON & 10,000 / 10,000 & $8.8\times10^{-17}$ & $1.8\times10^{-15}$ \\
 \hline
-NMOS OFF & $\sim6\times10^{-20}$ & $\sim1\times10^{-20}$ & $\sim2\times10^{-22}$ \\
+NMOS OFF & 10,000 / 10,000 & $4.4\times10^{-24}$ & $5.6\times10^{-22}$ \\
 \hline
-PMOS ON & $\sim2\times10^{-17}$ & $\sim8\times10^{-20}$ & $\sim2\times10^{-17}$ \\
+PMOS ON & 10,000 / 10,000 & $8.7\times10^{-18}$ & $1.1\times10^{-16}$ \\
 \hline
-PMOS OFF & $\sim3\times10^{-20}$ & $\sim7\times10^{-15}$ & $\sim2\times10^{-17}$ \\
-\hline
-\end{tabularx}
-\caption{Measured numerical resolution of each terminal current.}
-\label{tab:noise}
-\end{table}
-
-\keepspace{427pt}
-\subsection{Data Check: Trend Plots}
-\noindent The three required trends are plotted from the datasets and overlaid with a controlled SPICE sweep of the single parameter, with all other inputs nominal (Figures~\ref{fig:trend_t}--\ref{fig:trend_tox}). Currents are normalized per micrometre of effective width $W_{\text{eff}} = W - 2\,w_{\text{int}}$ ($w_{\text{int}} = 5$\,nm), because the gate current scales exactly with $W_{\text{eff}}$. The OFF current is the current at the physical drain, taken from samples at classic OFF bias: source within 5\,\% of its rail and $|V_d - V_s| \ge 0.5\,V_{DD}$. Table~\ref{tab:trends} quantifies the trends; every trend has the physically expected direction in both the dataset and the sweep.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.1cm}|>{\raggedright\arraybackslash}p{1.9cm}|c|L|}
-\hline
-\textbf{Trend} & \textbf{Case} & \textbf{Spearman $\rho$ (partial)} & \textbf{Controlled SPICE sweep} \\
-\hline
-\multirow{2}{3.1cm}{OFF current vs temperature} & NMOS OFF & $+0.73$ ($+0.75$) & $\times$15 total, $\times$64 channel part from $-40$ to $125\,^{\circ}$C \\
-\cline{2-4}
- & PMOS OFF & $+0.66$ ($+0.70$) & $\times$9 total, $\times$15 channel part \\
-\hline
-\multirow{2}{3.1cm}{OFF current vs \texttt{vth0}} & NMOS OFF & $-0.37$ ($-0.44$) & channel part: one decade per 81\,mV of $|\texttt{vth0}|$ \\
-\cline{2-4}
- & PMOS OFF & $-0.29$ ($-0.40$) & channel part: one decade per 82\,mV of $|\texttt{vth0}|$ \\
-\hline
-\multirow{4}{3.1cm}{Gate current vs \texttt{toxe}} & NMOS ON & $-0.44$ ($-0.69$) & 0.82 decades per \AA{} \\
-\cline{2-4}
- & NMOS OFF & $-0.57$ ($-0.87$) & 0.79 decades per \AA{} \\
-\cline{2-4}
- & PMOS ON & $-0.44$ ($-0.70$) & 0.77 decades per \AA{} \\
-\cline{2-4}
- & PMOS OFF & $-0.61$ ($-0.89$) & 0.77 decades per \AA{} \\
+PMOS OFF & 10,000 / 10,000 & $3.9\times10^{-16}$ & $1.2\times10^{-14}$ \\
 \hline
 \end{tabularx}
-\caption{Trend summary. Partial correlations hold the main confounding variable fixed (\texttt{vth0}, temperature and oxide voltage respectively).}
-\label{tab:trends}
+\caption{Kirchhoff check of the four datasets.}
+\label{tab:kcl}
 \end{table}
 
-\noindent The OFF current at the drain is the sum of the channel (sub-threshold) current and gate tunnelling current. Gate tunnelling is nearly independent of temperature and carries 78\,\% (NMOS) and 42\,\% (PMOS) of the OFF drain current at $-40\,^{\circ}$C, which is why the total rises much less with temperature than the channel part alone. The channel part falls one decade per 81--82\,mV of threshold voltage, consistent with a sub-threshold ideality factor of about 1.37 at $27\,^{\circ}$C.
+\noindent Figures~\ref{fig:trend_t}--\ref{fig:trend_tox} show the three required trends, each overlaid with a controlled SPICE sweep of the single parameter. All three have the expected direction. The OFF current rises with temperature ($\times$15 for NMOS and $\times$9 for PMOS from $-40$ to $125\,^{\circ}$C), less steeply than its sub-threshold channel part ($\times$64 and $\times$15) because the temperature-independent gate tunnelling current carries 78\,\% (NMOS) and 42\,\% (PMOS) of it at $-40\,^{\circ}$C. The channel part falls by one decade per 81--82\,mV of threshold voltage, and the gate current falls by about 0.8 decades per \AA{} of oxide thickness in all four cases.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{data_check/off_current_vs_temperature.png}
-\caption{OFF current versus temperature (deliverable 3), with the sweep split into its channel and gate-tunnelling parts.}
+\caption{OFF current versus temperature, with the sweep split into its channel and gate-tunnelling parts.}
 \label{fig:trend_t}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{data_check/off_current_vs_vth0.png}
-\caption{OFF current versus \texttt{vth0} (deliverable 3); colour shows temperature, which dominates the scatter.}
+\caption{OFF current versus \texttt{vth0}; colour shows temperature.}
 \label{fig:trend_v}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{data_check/gate_current_vs_toxe.png}
-\caption{Gate current versus \texttt{toxe} for all four cases (deliverable 3); colour shows the oxide voltage. The sweep is at the largest oxide voltage and bounds the cloud from above.}
+\caption{Gate current versus \texttt{toxe} for all four cases; colour shows the oxide voltage.}
 \label{fig:trend_tox}
 \end{figure}
 
-\noindent Table~\ref{tab:sens} gives the sensitivity of the currents to each process parameter at nominal bias. Every parameter has a measurable effect; \texttt{vth0} dominates the OFF channel current and \texttt{toxe} dominates the gate current, while \texttt{xj} has the weakest effect (about 1\,\%).
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|L|c|c|c|c|c|}
-\hline
-\textbf{Case (current)} & \texttt{vth0} & \texttt{toxe} & \texttt{ndep} & \texttt{u0} & \texttt{xj} \\
-\hline
-NMOS ON ($I_d$ / $I_g$) & $-16.1$ / $-26.4$ & $+14.1$ / $-89.6$ & $-3.4$ / $-3.5$ & $+9.4$ / $+0.7$ & $+0.4$ / $0.0$ \\
-\hline
-NMOS OFF ($I_d$ / $I_g$) & $-77.2$ / $0.0$ & $-43.7$ / $-90.7$ & $-15.2$ / $0.0$ & $+13.6$ / $0.0$ & $+0.5$ / $0.0$ \\
-\hline
-PMOS ON ($I_d$ / $I_g$) & $-13.7$ / $-27.7$ & $+24.4$ / $-87.4$ & $-3.7$ / $-5.8$ & $+15.9$ / $+0.5$ & $+0.3$ / $0.0$ \\
-\hline
-PMOS OFF ($I_d$ / $I_g$) & $-70.0$ / $0.0$ & $-39.8$ / $-90.8$ & $-20.0$ / $0.0$ & $+17.8$ / $0.0$ & $-1.2$ / $0.0$ \\
-\hline
-\end{tabularx}
-\caption{Change in current (\%) when each parameter moves from $-10\,\%$ to $+10\,\%$ of nominal ($V_{DD} = 1$\,V, $27\,^{\circ}$C, $W = 2L_{\min}$).}
-\label{tab:sens}
-\end{table}
-
 % ==========================================
-% SECTION 3: TRANSISTOR MODELS
+% SECTION 3: MODELS
 % ==========================================
 \newpage
 \addtocontents{toc}{\protect\thispagestyle{tocpage}}
@@ -549,73 +341,43 @@ PMOS OFF ($I_d$ / $I_g$) & $-70.0$ / $0.0$ & $-39.8$ / $-90.8$ & $-20.0$ / $0.0$
 \label{sec:models}
 
 \keepspace{14\baselineskip}
-\subsection{Learning Targets}
-\noindent Raw terminal currents are difficult targets: $I_d$ and $I_s$ change sign within the sampled range, the body current changes sign in the OFF cases, and magnitudes span up to ten decades. Writing $J = -I$ for the current flowing into each terminal, Kirchhoff's law ($J_d + J_g + J_s + J_b = 0$) allows the drain and source currents to be split exactly into a channel part $T$ and a shared part $S$:
+\subsection{Preprocessing}
+\noindent Raw currents are poor targets: $I_d$ and $I_s$ change sign, and magnitudes span up to ten decades. With $J = -I$ the current into each terminal, Kirchhoff's law splits the drain and source currents exactly into a channel part $T = (J_d - J_s)/2$ and a shared part $S = -(J_g + J_b)/2$, with $J_d = T + S$ and $J_s = -T + S$. Each model predicts three smooth quantities,
 \begin{equation}
-    J_d = T + S, \qquad J_s = -T + S, \qquad T = \frac{J_d - J_s}{2}, \qquad S = -\frac{J_g + J_b}{2}.
-\end{equation}
-
-\noindent In all samples of all four datasets the channel conductance $G = T/(V_d - V_s)$ is positive and the gate current has a fixed sign per case. Each model therefore learns three smooth quantities:
-\begin{equation}
-    y_1 = \log_{10}\frac{G}{W_{\text{eff}}}, \qquad
+    y_1 = \log_{10}\frac{T/(V_d - V_s)}{W_{\text{eff}}}, \qquad
     y_2 = \log_{10}\frac{|J_g|}{W_{\text{eff}}}, \qquad
     y_3 = \operatorname{asinh}\frac{J_b}{2 s_b},
 \end{equation}
 
-\noindent where $s_b$ is the body-current resolution floor of the case. The four terminal currents are rebuilt from $(y_1, y_2, y_3)$, so the predicted currents satisfy Kirchhoff's law exactly, and $I_d$ and $I_s$ can change sign wherever the physics does. A target normalized by $\phi(V_{ds}) = V_t\,(1-e^{-|V_{ds}|/V_t})$ instead of $V_{ds}$ was also evaluated; it increased the errors of our networks and was not adopted.
+\noindent from which all four currents are rebuilt, so the predictions satisfy Kirchhoff's law exactly. Here $W_{\text{eff}} = W - 10$\,nm and $s_b$ is the body-current resolution of the simulator. The inputs are $V_{DD}$, temperature, $\ln W_{\text{eff}}$, the higher and lower of $V_d$, $V_s$ referred to the body (drain and source are interchangeable), and the five process parameters, all standardized.
 
-\keepspace{230pt}
-\subsection{Input Features}
-\noindent Drain and source are interchangeable in the device model (verified to $10^{-13}$), so the features use the higher and lower of $V_d$ and $V_s$, referred to the body. The gate and body voltages are fixed functions of $V_{DD}$ in each case and carry no extra information. Table~\ref{tab:features} lists the features.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{2.4cm}|L|c|}
-\hline
-\textbf{Group} & \textbf{Features} & \textbf{Versions} \\
-\hline
-Base (10) & $V_{DD}$; $T$ (K); $\ln W_{\text{eff}}$; $\max(V_d,V_s) - V_b$; $\min(V_d,V_s) - V_b$; \texttt{vth0}; \texttt{toxe}; $\log_{10}$\texttt{ndep}; \texttt{u0}; \texttt{xj} & v1, v2, v3 \\
-\hline
-Physics (7) & $1000/T$; junction reverse-bias terms $1 - e^{-V_r/V_t}$ for both diffusions and the log of their sum; $\tanh(V_{ds}/V_t)$; $\ln(|V_g - V| + 0.01)$ for both diffusions & v3 \\
-\hline
-\end{tabularx}
-\caption{Model input features ($V_t = kT/q$, $V_r$ = junction reverse bias).}
-\label{tab:features}
-\end{table}
-
-\keepspace{14\baselineskip}
-\subsection{Error Metrics}
-\label{sec:metrics}
-\noindent The error of a prediction $\hat{I}$ of a SPICE current $I$ is the relative error $e = |\hat{I} - I|/|I|$, and the mean accuracy is $100\,\% - \text{mean}(e)$. A SPICE value is scored only if it exceeds ten times its measured numerical resolution (Table~\ref{tab:noise}); this excludes most PMOS OFF body currents and nothing else. The coefficient of determination $R^2$ is computed on $\log_{10}|I|$. Because a current that is a small difference of large parts can have a large relative error while contributing almost nothing to a gate's leakage, the error relative to the device's largest terminal current is also reported.
-
-\keepspace{263pt}
-\subsection{Model Types and Hyperparameter Search}
-\noindent Four model types were compared, each over the hyperparameter grid in Table~\ref{tab:grid}. Every grid point was fitted on the training set and scored on the validation set; the configuration with the lowest pooled 95th-percentile validation error was chosen. The test set was used once, for the chosen model only. The 84 fits ran in parallel, one per processor core.
+\keepspace{235pt}
+\subsection{Model Types and Hyperparameters}
+\noindent Four model types were tried over the grids in Table~\ref{tab:grid}. Every configuration was fitted on the training set and scored on the validation set; the configuration with the lowest pooled 95th-percentile validation error was chosen.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.4cm}|L|c|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.6cm}|L|}
 \hline
-\textbf{Model type} & \textbf{Hyperparameter grid} & \textbf{Fits per case} \\
+\textbf{Model type} & \textbf{Main hyperparameters (grid)} \\
 \hline
-Polynomial ridge & degree $\in \{2,3,4\}$; $\alpha \in \{10^{-8}, 10^{-5}, 10^{-2}\}$ & 9 \\
+Polynomial ridge & degree $\in \{2,3,4\}$; $\alpha \in \{10^{-8}, 10^{-5}, 10^{-2}\}$ \\
 \hline
-Random forest & 300 trees; min.\ samples per leaf $\in \{1,3\}$; max.\ features $\in \{0.5, 1.0\}$ & 4 \\
+Random forest & 300 trees; min.\ samples per leaf $\in \{1,3\}$; max.\ features $\in \{0.5, 1.0\}$ \\
 \hline
-Gradient boosting & learning rate $\in \{0.05, 0.1\}$; 1000 iterations; max.\ leaf nodes $\in \{31, 63\}$ & 4 \\
+Gradient boosting & learning rate $\in \{0.05, 0.1\}$; 1000 iterations; max.\ leaf nodes $\in \{31, 63\}$ \\
 \hline
-Neural network (MLP) & tanh, L-BFGS, one network per target; hidden layers $\in \{64^3, 96^3\}$; $\alpha \in \{10^{-6}, 10^{-7}\}$; 4000 iterations & 4 \\
+Neural network (MLP) & tanh, L-BFGS, one network per target; hidden layers $\in \{64^3, 96^3\}$; $\alpha \in \{10^{-6}, 10^{-7}\}$ \\
 \hline
 \end{tabularx}
-\caption{Model types and hyperparameter grids. All inputs are standardized.}
+\caption{Model types and hyperparameter grids.}
 \label{tab:grid}
 \end{table}
 
-\keepspace{350pt}
+\keepspace{333pt}
 \subsection{Model Comparison}
-\noindent Table~\ref{tab:compare} gives the best configuration of each type for each case on the validation set (deliverable 4). The neural network is the most accurate type in every case on all three statistics: it has the highest $R^2$ and about ten times lower median and 95th-percentile error than the next type. It was therefore chosen for all four cases. The tree ensembles approximate the smooth exponential dependence on voltage and temperature with piecewise-constant steps, and the polynomial models cannot follow it over several decades of current, which explains their larger errors.
+\noindent Table~\ref{tab:compare} gives the best configuration of each type on the validation set. The neural network is best in every case on all three statistics, with about ten times lower median and 95th-percentile error than the next type, and was chosen for all four cases. The tree ensembles approximate the smooth exponential dependence on voltage and temperature with piecewise-constant steps, and the polynomials cannot follow it over several decades of current.
 
 \begin{table}[H]
 \centering
@@ -633,20 +395,13 @@ PMOS ON & 0.9963 / 3.89 / 20.9 & 0.9848 / 10.90 / 77.3 & 0.9969 / 2.99 / 30.0 & 
 PMOS OFF & 0.9434 / 4.23 / 117.6 & 0.9425 / 7.84 / 76.2 & 0.9866 / 2.89 / 33.9 & \textbf{0.9994 / 0.32 / 4.7} \\
 \hline
 \end{tabularx}
-\caption{Model comparison on the validation set: $R^2$ of $\log_{10}|I|$ / median error (\%) / 95th-percentile error (\%), pooled over $I_d$, $I_g$, $I_s$, $I_b$. Bold: chosen model.}
+\caption{Model comparison on the validation set: $R^2$ of $\log_{10}|I|$ / median error (\%) / 95th-percentile error (\%), pooled over the four currents. Bold: chosen model.}
 \label{tab:compare}
 \end{table}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{model_selection/model_comparison.png}
-\caption{Validation median and 95th-percentile error of the four model types (log scale).}
-\label{fig:compare}
-\end{figure}
-
-\keepspace{296pt}
-\subsection{Chosen Models (v1)}
-\noindent The chosen configurations are a $64\times64\times64$ network for NMOS ON ($\alpha = 10^{-6}$), NMOS OFF ($\alpha = 10^{-7}$) and PMOS ON ($\alpha = 10^{-7}$), and a $96\times96\times96$ network for PMOS OFF ($\alpha = 10^{-6}$). Within the network grid, each case uses the configuration with the lowest validation 95th-percentile error, the selection rule fixed before training; the differences between network configurations were small (under 10\,\% in validation p95). Table~\ref{tab:chosen} gives their test-set errors (deliverable 5), and Figure~\ref{fig:pvs} shows the predicted-versus-SPICE plots.
+\keepspace{281pt}
+\subsection{Chosen Models}
+\noindent The chosen networks are $64\times64\times64$ for NMOS ON ($\alpha = 10^{-6}$), NMOS OFF and PMOS ON ($\alpha = 10^{-7}$), and $96\times96\times96$ for PMOS OFF ($\alpha = 10^{-6}$); the differences between network configurations were below 10\,\% in validation p95. Table~\ref{tab:chosen} gives their test-set errors and Figure~\ref{fig:pvs} the predicted-versus-SPICE plots. $R^2$ of $\log_{10}|I|$ exceeds 0.994 for every current except the NMOS OFF body current (0.962), which changes sign around $10^{-17}$\,A and dominates the pooled NMOS OFF tail.
 
 \begin{table}[H]
 \centering
@@ -664,11 +419,9 @@ PMOS ON & 0.36 / 2.18 & 0.28 / 1.8 & 0.39 / 2.6 & 0.28 / 1.8 & 0.60 / 2.6 \\
 PMOS OFF & 0.34 / 4.90 & 0.35 / 5.2 & 0.24 / 1.0 & 0.33 / 4.7 & 1.75 / 9.4 \\
 \hline
 \end{tabularx}
-\caption{Chosen v1 models on the test set: median / 95th-percentile relative error (\%).}
+\caption{Chosen models on the test set: median / 95th-percentile relative error (\%).}
 \label{tab:chosen}
 \end{table}
-
-\noindent On the test set, $R^2$ of $\log_{10}|I|$ is between 0.994 and 0.99999 for every current of every case, except the NMOS OFF body current (0.962). That current changes sign around $10^{-17}$\,A, about a million times below the drain current, and dominates the pooled NMOS OFF tail; relative to the device's largest current, the 95th-percentile error is below 1.7\,\% in every case.
 
 \begin{figure}[H]
 \centering
@@ -680,245 +433,69 @@ PMOS OFF & 0.34 / 4.90 & 0.35 / 5.2 & 0.24 / 1.0 & 0.33 / 4.7 & 1.75 / 9.4 \\
 \includegraphics[width=0.49\linewidth]{model_selection/pred_vs_spice_pmos_on.png}
 \hfill
 \includegraphics[width=0.49\linewidth]{model_selection/pred_vs_spice_pmos_off.png}
-\caption{Predicted versus SPICE terminal currents on the test set for the chosen v1 models (deliverable 5): NMOS ON, NMOS OFF (top); PMOS ON, PMOS OFF (bottom).}
+\caption{Predicted versus SPICE terminal currents on the test set: NMOS ON, NMOS OFF (top); PMOS ON, PMOS OFF (bottom).}
 \label{fig:pvs}
 \end{figure}
 
-\keepspace{237pt}
-\subsection{Learning Curve}
-\noindent Table~\ref{tab:lc} shows the validation error of the chosen configuration for growing training sets. The error falls at every step, including the last (4,000 to 7,000 samples, $-8$ to $-21\,\%$ in median and $-20$ to $-43\,\%$ in p95), so the uniform dataset size is not past the point of diminishing returns. This motivated the additional training data of v2.
+\keepspace{361pt}
+\subsection{Improved Models}
+\label{sec:improved}
+\noindent The validation error still fell at the largest training-set size (from 4,000 to 7,000 samples: $-8$ to $-21\,\%$ in median), so the chosen networks were improved in two steps. \textbf{v2} trains each on 27,000 uniform samples and averages five networks trained from different random starts. \textbf{v3} adds 7,000 rail-focused samples and seven physics features ($1000/T$, junction reverse-bias terms, $\tanh(V_{ds}/V_t)$ and the log gate-to-diffusion voltages). The original models are referred to as \textbf{v1}. Table~\ref{tab:v123} compares the three versions on the uniform test set and on the rail-focused test set, which mimics the operating points inside gates.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\linewidth}{|L|c|c|c|c|}
-\hline
-\textbf{Case} & \textbf{1,000} & \textbf{2,000} & \textbf{4,000} & \textbf{7,000} \\
-\hline
-NMOS ON & 1.22 / 12.90 & 0.69 / 5.79 & 0.57 / 3.39 & 0.45 / 2.66 \\
-\hline
-NMOS OFF & 1.54 / 236.94 & 0.67 / 92.90 & 0.54 / 35.14 & 0.46 / 19.87 \\
-\hline
-PMOS ON & 0.87 / 8.29 & 0.55 / 4.30 & 0.46 / 2.85 & 0.37 / 2.05 \\
-\hline
-PMOS OFF & 0.88 / 29.48 & 0.47 / 12.06 & 0.35 / 5.97 & 0.32 / 4.75 \\
-\hline
-\end{tabularx}
-\caption{Learning curve: validation median / 95th-percentile error (\%) versus number of training samples.}
-\label{tab:lc}
-\end{table}
-
-\keepspace{410pt}
-\subsection{Improved Versions v2 and v3}
-\noindent \textbf{v2} trains the chosen configuration of each case on 27,000 uniform samples (the 7,000 deliverable training samples and 20,000 additional ones) and averages five networks trained from different random starts. Training and validation errors of a single network are nearly equal, so its error is dominated by bias in sparsely sampled regions; averaging independently initialized networks removes the run-specific part of this error.
-
-\medskip
-\noindent \textbf{v3} adds 7,000 rail-focused samples per case (Section~\ref{sec:rail}) and the seven physics features of Table~\ref{tab:features}. The rail-focused validation and test sets (1,500 samples each) measure accuracy in the operating region of transistors inside gates. Each v3 network trained on 34,000 samples in 52--78 minutes; the twenty networks ran in parallel.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{1.2cm}|C|C|C|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.9cm}|>{\raggedright\arraybackslash}p{1.3cm}|C|C|C|}
 \hline
 \textbf{Case} & \textbf{Test set} & \textbf{v1} & \textbf{v2} & \textbf{v3} \\
 \hline
-\multirow{2}{1.7cm}{NMOS ON} & uniform & 0.46 / 2.75 / 1.65 & 0.27 / 1.76 / 1.09 & 0.30 / \textbf{1.65} / \textbf{1.08} \\
+\multirow{2}{1.9cm}{NMOS ON} & uniform & 0.46 / 2.75 & 0.27 / 1.76 & 0.30 / \textbf{1.65} \\
 \cline{2-5}
- & rail & 0.62 / 10.34 / 4.89 & 0.36 / 5.38 / 2.44 & 0.39 / \textbf{2.49} / \textbf{1.52} \\
+ & rail & 0.62 / 10.34 & 0.36 / 5.38 & 0.39 / \textbf{2.49} \\
 \hline
-\multirow{2}{1.7cm}{NMOS OFF} & uniform & 0.44 / 20.02 / 0.72 & 0.25 / 7.25 / 0.43 & 0.26 / \textbf{6.51} / 0.45 \\
+\multirow{2}{1.9cm}{NMOS OFF} & uniform & 0.44 / 20.02 & 0.25 / 7.25 & 0.26 / \textbf{6.51} \\
 \cline{2-5}
- & rail & 0.90 / 79.61 / 3.43 & 0.53 / 30.25 / 2.06 & \textbf{0.43} / \textbf{9.98} / \textbf{1.03} \\
+ & rail & 0.90 / 79.61 & 0.53 / 30.25 & \textbf{0.43} / \textbf{9.98} \\
 \hline
-\multirow{2}{1.7cm}{PMOS ON} & uniform & 0.36 / 2.18 / 1.11 & 0.21 / 1.51 / 0.67 & 0.21 / \textbf{1.23} / 0.68 \\
+\multirow{2}{1.9cm}{PMOS ON} & uniform & 0.36 / 2.18 & 0.21 / 1.51 & 0.21 / \textbf{1.23} \\
 \cline{2-5}
- & rail & 0.51 / 7.91 / 2.96 & 0.29 / 5.76 / 1.91 & \textbf{0.28} / \textbf{2.11} / \textbf{1.22} \\
+ & rail & 0.51 / 7.91 & 0.29 / 5.76 & \textbf{0.28} / \textbf{2.11} \\
 \hline
-\multirow{2}{1.7cm}{PMOS OFF} & uniform & 0.34 / 4.90 / 0.77 & 0.17 / 2.54 / 0.45 & 0.21 / 2.56 / 0.45 \\
+\multirow{2}{1.9cm}{PMOS OFF} & uniform & 0.34 / 4.90 & 0.17 / 2.54 & 0.21 / 2.56 \\
 \cline{2-5}
- & rail & 0.69 / 16.96 / 3.33 & 0.37 / 10.98 / 1.65 & \textbf{0.31} / \textbf{3.72} / \textbf{0.86} \\
+ & rail & 0.69 / 16.96 & 0.37 / 10.98 & \textbf{0.31} / \textbf{3.72} \\
 \hline
 \end{tabularx}
-\caption{Transistor models on the uniform and rail-focused test sets: pooled median / 95th-percentile relative error / 95th-percentile error relative to the largest terminal current (\%). Bold: best of the three versions.}
+\caption{Transistor models of the three versions: pooled median / 95th-percentile test error (\%). Bold: best version.}
 \label{tab:v123}
 \end{table}
 
-\noindent On uniform test samples v2 and v3 are equally accurate. On rail-focused samples v3 reduces the pooled 95th-percentile errors about four- to eightfold relative to v1; the largest gain is in the ON-state gate current, whose 95th-percentile error falls from 58.9\,\% (v1) and 35.8\,\% (v2) to 2.9\,\% (v3) for NMOS ON, and from 21.2\,\% and 9.5\,\% to 2.3\,\% for PMOS ON. Table~\ref{tab:v3cur} gives the v3 errors for each current.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.9cm}|C|C|C|C|}
-\hline
-\textbf{Case} & \textbf{$I_d$} & \textbf{$I_g$} & \textbf{$I_s$} & \textbf{$I_b$} \\
-\hline
-NMOS ON & 0.33 / 1.5 / 1.0000 & 0.20 / 1.8 / 1.0000 & 0.33 / 1.5 / 1.0000 & 0.39 / 1.9 / 1.0000 \\
-\hline
-NMOS OFF & 0.21 / 4.3 / 0.9981 & 0.13 / 0.5 / 1.0000 & 0.19 / 4.0 / 0.9973 & 1.98 / 14.2 / 0.9937 \\
-\hline
-PMOS ON & 0.19 / 1.0 / 1.0000 & 0.17 / 1.3 / 1.0000 & 0.19 / 1.0 / 1.0000 & 0.35 / 1.5 / 1.0000 \\
-\hline
-PMOS OFF & 0.22 / 3.1 / 0.9950 & 0.15 / 0.5 / 1.0000 & 0.20 / 3.0 / 0.9957 & 0.91 / 4.6 / 1.0000 \\
-\hline
-\end{tabularx}
-\caption{v3 models on the uniform test set: median (\%) / 95th-percentile error (\%) / $R^2$ of $\log_{10}|I|$ for each current. $R^2 > 0.99$ for every current of every case.}
-\label{tab:v3cur}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{model_selection_v3/comparison.png}
-\caption{95th-percentile error relative to the largest terminal current for v1, v2, a single v3 network and the averaged v3 networks, on the uniform (left) and rail-focused (right) test sets.}
-\label{fig:v123}
-\end{figure}
+\noindent On uniform samples v2 and v3 are equally accurate; on rail-focused samples v3 cuts the 95th-percentile error four- to eightfold relative to v1, most of all for the ON-state gate current (NMOS ON: 58.9\,\% in v1, 2.9\,\% in v3). For v3, $R^2$ exceeds 0.99 for every current of every case. The v3 models are used for the final gate and test-circuit results.
 
 % ==========================================
-% SECTION 4: GATE-LEVEL VALIDATION
+% SECTION 4: GATE RESULTS
 % ==========================================
 \newpage
 \addtocontents{toc}{\protect\thispagestyle{tocpage}}
 \section{Gate Results}
 \label{sec:gates}
 
-\keepspace{296pt}
-\subsection{Gates and Netlists}
-\noindent The five gates are standard static CMOS (Table~\ref{tab:gates}). AND2 and OR2 are a NAND2 or NOR2 followed by an inverter and are simulated as complete gates. NMOS bodies are tied to ground and PMOS bodies to $V_{DD}$. In the NAND2 pull-down, input B drives the transistor at the output and input A the transistor at ground; in the NOR2 pull-up, A drives the transistor at $V_{DD}$ and B the transistor at the output. A single description of each gate in code generates both its SPICE netlist and its ML model, so the two always describe the same circuit.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.6cm}|c|>{\centering\arraybackslash}p{2.6cm}|L|}
-\hline
-\textbf{Gate} & \textbf{Transistors} & \textbf{$W_n$ / $W_p$ (nm)} & \textbf{Internal nodes} \\
-\hline
-INV & 2 & 44 / 88 & none \\
-\hline
-NAND2 & 4 & 88 / 88 & $x$ (between the series NMOS) \\
-\hline
-NOR2 & 4 & 44 / 176 & $y$ (between the series PMOS) \\
-\hline
-AND2 & 6 & NAND2 + INV & $x$, \texttt{nand\_out} \\
-\hline
-OR2 & 6 & NOR2 + INV & $y$, \texttt{nor\_out} \\
-\hline
-\end{tabularx}
-\caption{Gates, transistor widths ($L = 22$\,nm) and internal nodes.}
-\label{tab:gates}
-\end{table}
-
-\noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}
-* NAND2 - static CMOS, transistor level. Inputs a, b; output out; internal x
-* Corner 0 of data/gates/corners.csv: VDD = 1.0110811346493778 V, T = 10.862496454295702 C
-.include ../../model/derived/22nm_MGK_param.pm
-.options gmin=1e-18 abstol=1e-18 reltol=1e-6 vntol=1e-9
-.temp 10.862496454295702
-.param in_a=0 in_b=0
-Vdd vdd 0 1.0110811346493778
-Va a 0 {in_a}
-Vb b 0 {in_b}
-mpa out a vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
-mpb out b vdd vdd pmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
-mnb out b x 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
-mna x a 0 0 nmos W=8.8e-08 L=2.2e-08 AS=3.872e-15 AD=3.872e-15 PS=2.64e-07 PD=2.64e-07
-\end{lstlisting}
-\end{minipage}
-
-\noindent The excerpt omits the process-parameter lines and the control block. The input sources are changed with \texttt{alterparam} to simulate every input combination at the same corner in one ngspice run.
-
 \keepspace{14\baselineskip}
-\subsection{Corners and Leakage Definitions}
-\noindent A corner is one random draw of $V_{DD}$, temperature and the process parameters, using the distributions of Table~\ref{tab:sampling}; all NMOS in a circuit share one draw and all PMOS share another. The same 200 corners (fixed seed) are used for the gates and the test circuit, and gate inputs are applied at exactly 0 or $V_{DD}$.
+\subsection{Method}
+\noindent The gates are static CMOS with $W_n/W_p$ of 44/88\,nm (INV), 88/88\,nm (NAND2) and 44/176\,nm (NOR2); AND2 and OR2 are a NAND2 or NOR2 followed by an inverter and are simulated as complete gates. Every gate is simulated in SPICE at each input combination (18 cases) and at the same 200 random PVT corners (3,600 operating points), with inputs at exactly 0 or $V_{DD}$. All NMOS in a circuit share one process draw and all PMOS another.
 
 \medskip
-\noindent Two leakage definitions are reported throughout. The \textbf{total} leakage is the current delivered by every source held at $V_{DD}$ (the supply and the inputs at logic 1), which equals the static power divided by $V_{DD}$. The \textbf{supply-only} leakage is the current delivered by the $V_{DD}$ supply alone. They differ wherever inputs at logic 1 drive gate-tunnelling current into NMOS gates; for NOR2 at AB = 11 the difference is a factor of 14.
-
-\keepspace{367pt}
-\subsection{SPICE Reference}
-\noindent Every gate was simulated at every input combination and corner (18 cases $\times$ 200 corners = 3,600 operating points), recording all source currents, the output voltage and the internal node voltages. Every output and internal logic node lies within 0.71\,\% of $V_{DD}$ of its rail. Figure~\ref{fig:gspice} and Table~\ref{tab:gspice} summarize the leakage; the stack effect is visible in NAND2 at AB = 00 ($x \approx 0.1\,V_{DD}$) and NOR2 at AB = 11 ($y \approx 0.9\,V_{DD}$).
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{gates/spice_leakage.png}
-\caption{Gate leakage from SPICE over 200 corners (box: total leakage; diamond: median supply-only leakage).}
-\label{fig:gspice}
-\end{figure}
-\pagebreak
-
-\begin{table}[H]
-\centering
-\scriptsize
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.0cm}|c|c|c|c|c|c|L|}
-\hline
-\textbf{Gate} & \textbf{AB} & \textbf{Out} & \textbf{Total median} & \textbf{Total min -- max} & \textbf{Supply median} & \textbf{Ratio} & \textbf{Internal nodes ($\times V_{DD}$)} \\
-\hline
-INV & 0 & 1 & 134.85 & 27.53 -- 512.6 & 134.85 & 1.00 & -- \\
-\hline
-INV & 1 & 0 & 156.49 & 33.11 -- 577.2 & 96.32 & 1.53 & -- \\
-\hline
-NAND2 & 00 & 1 & 170.20 & 49.77 -- 830.4 & 170.20 & 1.00 & $x$ 0.105 \\
-\hline
-NAND2 & 01 & 1 & 146.35 & 28.11 -- 574.0 & 146.29 & 1.00 & $x$ 0.803 \\
-\hline
-NAND2 & 10 & 1 & 311.11 & 62.86 -- 937.4 & 200.54 & 1.38 & $x$ 0.000 \\
-\hline
-NAND2 & 11 & 0 & 437.51 & 90.58 -- 1502.1 & 192.13 & 2.07 & $x$ 0.001 \\
-\hline
-NOR2 & 00 & 1 & 457.67 & 88.43 -- 1808.6 & 457.67 & 1.00 & $y$ 0.999 \\
-\hline
-NOR2 & 01 & 0 & 459.76 & 98.26 -- 1651.3 & 393.13 & 1.18 & $y$ 0.999 \\
-\hline
-NOR2 & 10 & 0 & 186.07 & 33.39 -- 712.7 & 115.85 & 1.47 & $y$ 0.165 \\
-\hline
-NOR2 & 11 & 0 & 120.92 & 31.52 -- 418.1 & 8.36 & 14.44 & $y$ 0.904 \\
-\hline
-AND2 & 00 & 0 & 362.79 & 96.59 -- 1253.0 & 362.79 & 1.00 & $x$ 0.105, \texttt{nand\_out} 0.999 \\
-\hline
-AND2 & 01 & 0 & 310.59 & 67.15 -- 1057.8 & 310.57 & 1.00 & $x$ 0.803, \texttt{nand\_out} 0.999 \\
-\hline
-AND2 & 10 & 0 & 472.99 & 96.08 -- 1375.9 & 363.98 & 1.22 & $x$ 0.000, \texttt{nand\_out} 0.999 \\
-\hline
-AND2 & 11 & 1 & 582.98 & 125.09 -- 1760.9 & 336.73 & 1.61 & $x$ 0.001, \texttt{nand\_out} 0.002 \\
-\hline
-OR2 & 00 & 0 & 618.13 & 135.31 -- 2256.9 & 618.13 & 1.00 & $y$ 0.999, \texttt{nor\_out} 0.998 \\
-\hline
-OR2 & 01 & 1 & 610.18 & 125.78 -- 2095.8 & 531.85 & 1.13 & $y$ 0.999, \texttt{nor\_out} 0.001 \\
-\hline
-OR2 & 10 & 1 & 325.69 & 67.94 -- 1157.3 & 263.81 & 1.23 & $y$ 0.165, \texttt{nor\_out} 0.001 \\
-\hline
-OR2 & 11 & 1 & 262.54 & 66.34 -- 772.3 & 148.46 & 1.69 & $y$ 0.904, \texttt{nor\_out} 0.000 \\
-\hline
-\end{tabularx}
-\caption{Gate leakage from SPICE over 200 corners (nA). Ratio = total / supply-only (median).}
-\label{tab:gspice}
-\end{table}
-
-
-\keepspace{14\baselineskip}
-\subsection{Gate Leakage from the Transistor Models}
-\noindent For each gate, input combination and corner, the drain and source voltage of every transistor is taken from the SPICE-recorded node voltages (inputs, output and internal nodes), its body is at its rail, and its gate is at the logic rail of its node. The transistor's type and gate level select one of the four models, which returns the four terminal currents.
-
-\medskip
-\noindent The leakage is obtained from Kirchhoff's law. Let $H$ be a set of nodes whose only sources are the sources whose current is sought ($V_{DD}$, plus the inputs at logic 1 for the total leakage). The current those sources deliver equals the net current leaving $H$:
+\noindent For the ML estimate, each transistor's drain and source voltages are taken from the recorded SPICE node voltages and its gate is at the logic rail of its node; the four models give its terminal currents. The leakage is then the current delivered by the sources of interest, obtained from Kirchhoff's law as the net current leaving the set of nodes $H$ connected to those sources through ON transistors:
 \begin{equation}
-    I_{\text{leak}} \;=\; \sum_{k} \;\sum_{t \in \{d,g,s,b\},\; n_{k,t} \in H} J_{k,t},
+    I_{\text{leak}} \;=\; \sum_{k} \;\sum_{t \in \{d,g,s,b\},\; n_{k,t} \in H} J_{k,t}.
     \label{eq:nodeset}
 \end{equation}
 
-\noindent where $n_{k,t}$ is the node at terminal $t$ of transistor $k$. $H$ is grown from the sources through every ON transistor, so the sum is carried by the OFF transistors and gate oxides on its boundary, which are the physical leakage paths. As an independent check, the total leakage is also computed from the static power balance:
-\begin{equation}
-    I_{\text{total}} \;=\; \frac{1}{V_{DD}} \sum_{k} \Big[ J_{d}\,(V_d - V_s) + J_{g}\,(V_g - V_s) + J_{b}\,(V_b - V_s) \Big]_k ,
-    \label{eq:power}
-\end{equation}
+\noindent Two definitions are reported: the \textbf{total} leakage, delivered by every source at $V_{DD}$ (the supply and the inputs at logic 1, equal to the static power divided by $V_{DD}$), and the \textbf{supply-only} leakage, delivered by $V_{DD}$ alone. With exact single-transistor SPICE currents in place of the models, Eq.~\eqref{eq:nodeset} reproduces the gate SPICE leakage to within $10^{-7}$ for INV, NAND2 and NOR2. For AND2 and OR2 the inverter's gate sits up to 7\,mV from its rail, which the models do not represent; this \emph{composition floor} is a median error of 0.08--0.67\,\% even with exact currents.
 
-\noindent which also splits the leakage into channel, gate-tunnelling and body components. With exact single-transistor SPICE currents in place of the models, both Eq.~\eqref{eq:nodeset} and Eq.~\eqref{eq:power} reproduce the gate SPICE leakage to within $6.4\times10^{-8}$ for INV, NAND2 and NOR2, which confirms the composition.
-
-\medskip
-\noindent For AND2 and OR2 the inverter's gate is driven by \texttt{nand\_out} or \texttt{nor\_out}, which sit up to 7\,mV from their rail. The transistor models represent gates only at exactly 0 or $V_{DD}$, so this offset is not modelled. Its effect, the \emph{composition floor}, is the error that remains even with exact transistor currents: a median of 0.08--0.67\,\% for AND2 and OR2 and zero for the other gates.
-
-\keepspace{283pt}
+\keepspace{294pt}
 \subsection{Results}
-\noindent Table~\ref{tab:gsum} compares the three model versions over all 3,600 operating points; Tables~\ref{tab:g3tot} and~\ref{tab:g3vdd} give the per-case results of v3 for both leakage definitions (deliverable 6), and Figure~\ref{fig:gparity} shows the parity plot (deliverable 7).
+\noindent Table~\ref{tab:gsum} summarizes all 3,600 operating points for the three model versions. With v3 the mean accuracy is 99.48\,\% (total) and 99.41\,\% (supply-only), and no operating point is worse than 3.6\,\% (total). Table~\ref{tab:g3} gives the per-case results and Figure~\ref{fig:gparity} the parity plot.
 
 \begin{table}[H]
 \centering
@@ -940,312 +517,129 @@ OR2 & 11 & 1 & 262.54 & 66.34 -- 772.3 & 148.46 & 1.69 & $y$ 0.904, \texttt{nor\
  & v3 & \textbf{0.48} & \textbf{1.54} & \textbf{0.59} & \textbf{99.41} & $\mathbf{-0.28}$ & \textbf{6.2} \\
 \hline
 \end{tabularx}
-\caption{Gate leakage over all 18 cases and 200 corners: errors (\%) of the three versions. Points above 2\,\% error (total): 521 (v1), 89 (v2), 48 (v3).}
+\caption{Gate leakage over all 18 cases and 200 corners: errors (\%) of the three model versions.}
 \label{tab:gsum}
 \end{table}
 
 \begin{table}[H]
 \centering
 \scriptsize
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.0cm}|c|C|C|C|C|C|C|C|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.0cm}|c|C|C|C|C|C|C|}
 \hline
-\textbf{Gate} & \textbf{AB} & \textbf{SPICE median (nA)} & \textbf{ML median (nA)} & \textbf{Bias (\%)} & \textbf{Median err. (\%)} & \textbf{p95 err. (\%)} & \textbf{Mean err. (\%)} & \textbf{Floor (\%)} \\
+\textbf{Gate} & \textbf{AB} & \textbf{SPICE median (nA)} & \textbf{ML median (nA)} & \textbf{Bias (\%)} & \textbf{Median err. (\%)} & \textbf{p95 err. (\%)} & \textbf{Supply-only median err. / p95 (\%)} \\
 \hline
-INV & 0 & 134.85 & 136.50 & $+0.33$ & 0.50 & 1.47 & 0.58 & 0.000 \\
+INV & 0 & 134.85 & 136.50 & $+0.33$ & 0.50 & 1.47 & 0.50 / 1.47 \\
 \hline
-INV & 1 & 156.49 & 156.49 & $+0.09$ & 0.22 & 0.73 & 0.28 & 0.000 \\
+INV & 1 & 156.49 & 156.49 & $+0.09$ & 0.22 & 0.73 & 0.30 / 1.00 \\
 \hline
-NAND2 & 00 & 170.20 & 169.98 & $+0.11$ & 0.52 & 1.43 & 0.59 & 0.000 \\
+NAND2 & 00 & 170.20 & 169.98 & $+0.11$ & 0.52 & 1.43 & 0.52 / 1.43 \\
 \hline
-NAND2 & 01 & 146.35 & 147.48 & $-0.24$ & 0.41 & 1.04 & 0.48 & 0.000 \\
+NAND2 & 01 & 146.35 & 147.48 & $-0.24$ & 0.41 & 1.04 & 0.41 / 1.05 \\
 \hline
-NAND2 & 10 & 311.11 & 312.29 & $-0.15$ & 0.30 & 0.91 & 0.38 & 0.000 \\
+NAND2 & 10 & 311.11 & 312.29 & $-0.15$ & 0.30 & 0.91 & 0.42 / 1.06 \\
 \hline
-NAND2 & 11 & 437.51 & 435.70 & $-0.08$ & 0.24 & 0.88 & 0.31 & 0.000 \\
+NAND2 & 11 & 437.51 & 435.70 & $-0.08$ & 0.24 & 0.88 & 0.30 / 1.00 \\
 \hline
-NOR2 & 00 & 457.67 & 457.26 & $-0.08$ & 0.47 & 1.46 & 0.59 & 0.000 \\
+NOR2 & 00 & 457.67 & 457.26 & $-0.08$ & 0.47 & 1.46 & 0.47 / 1.46 \\
 \hline
-NOR2 & 01 & 459.76 & 459.27 & $-0.29$ & 0.39 & 1.14 & 0.44 & 0.000 \\
+NOR2 & 01 & 459.76 & 459.27 & $-0.29$ & 0.39 & 1.14 & 0.45 / 1.21 \\
 \hline
-NOR2 & 10 & 186.07 & 185.15 & $-0.26$ & 0.35 & 0.81 & 0.37 & 0.000 \\
+NOR2 & 10 & 186.07 & 185.15 & $-0.26$ & 0.35 & 0.81 & 0.53 / 1.21 \\
 \hline
-NOR2 & 11 & 120.92 & 121.29 & $-0.11$ & 0.40 & 1.16 & 0.48 & 0.000 \\
+NOR2 & 11 & 120.92 & 121.29 & $-0.11$ & 0.40 & 1.16 & 0.66 / 1.48 \\
 \hline
-AND2 & 00 & 362.79 & 362.60 & $-0.24$ & 0.37 & 1.14 & 0.44 & 0.290 \\
+AND2 & 00 & 362.79 & 362.60 & $-0.24$ & 0.37 & 1.14 & 0.37 / 1.14 \\
 \hline
-AND2 & 01 & 310.59 & 308.03 & $-0.88$ & 0.88 & 2.07 & 0.94 & 0.673 \\
+AND2 & 01 & 310.59 & 308.03 & $-0.88$ & 0.88 & 2.07 & 0.88 / 2.07 \\
 \hline
-AND2 & 10 & 472.99 & 470.38 & $-0.87$ & 0.78 & 2.13 & 0.92 & 0.623 \\
+AND2 & 10 & 472.99 & 470.38 & $-0.87$ & 0.78 & 2.13 & 1.04 / 2.34 \\
 \hline
-AND2 & 11 & 582.98 & 582.72 & $-0.16$ & 0.28 & 0.84 & 0.34 & 0.159 \\
+AND2 & 11 & 582.98 & 582.72 & $-0.16$ & 0.28 & 0.84 & 0.33 / 1.16 \\
 \hline
-OR2 & 00 & 618.13 & 615.66 & $-0.86$ & 0.79 & 2.26 & 0.90 & 0.649 \\
+OR2 & 00 & 618.13 & 615.66 & $-0.86$ & 0.79 & 2.26 & 0.79 / 2.26 \\
 \hline
-OR2 & 01 & 610.18 & 609.99 & $-0.33$ & 0.45 & 1.06 & 0.49 & 0.133 \\
+OR2 & 01 & 610.18 & 609.99 & $-0.33$ & 0.45 & 1.06 & 0.52 / 1.17 \\
 \hline
-OR2 & 10 & 325.69 & 323.97 & $-0.22$ & 0.35 & 0.87 & 0.39 & 0.189 \\
+OR2 & 10 & 325.69 & 323.97 & $-0.22$ & 0.35 & 0.87 & 0.43 / 0.96 \\
 \hline
-OR2 & 11 & 262.54 & 264.15 & $+0.10$ & 0.26 & 0.97 & 0.35 & 0.077 \\
-\hline
-\end{tabularx}
-\caption{v3 gate results, total leakage (deliverable 6). Floor = median error of the composition with exact transistor currents.}
-\label{tab:g3tot}
-\end{table}
-
-\begin{table}[H]
-\centering
-\scriptsize
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.0cm}|c|C|C|C|C|C|C|C|}
-\hline
-\textbf{Gate} & \textbf{AB} & \textbf{SPICE median (nA)} & \textbf{ML median (nA)} & \textbf{Bias (\%)} & \textbf{Median err. (\%)} & \textbf{p95 err. (\%)} & \textbf{Mean err. (\%)} & \textbf{Floor (\%)} \\
-\hline
-INV & 0 & 134.85 & 136.50 & $+0.33$ & 0.50 & 1.47 & 0.58 & 0.000 \\
-\hline
-INV & 1 & 96.32 & 96.45 & $+0.09$ & 0.30 & 1.00 & 0.38 & 0.000 \\
-\hline
-NAND2 & 00 & 170.20 & 169.98 & $+0.11$ & 0.52 & 1.43 & 0.59 & 0.000 \\
-\hline
-NAND2 & 01 & 146.29 & 147.36 & $-0.24$ & 0.41 & 1.05 & 0.48 & 0.000 \\
-\hline
-NAND2 & 10 & 200.54 & 200.28 & $-0.28$ & 0.42 & 1.06 & 0.48 & 0.000 \\
-\hline
-NAND2 & 11 & 192.13 & 192.28 & $+0.10$ & 0.30 & 1.00 & 0.37 & 0.000 \\
-\hline
-NOR2 & 00 & 457.67 & 457.26 & $-0.08$ & 0.47 & 1.46 & 0.59 & 0.000 \\
-\hline
-NOR2 & 01 & 393.13 & 394.02 & $-0.36$ & 0.45 & 1.21 & 0.52 & 0.000 \\
-\hline
-NOR2 & 10 & 115.85 & 114.83 & $-0.48$ & 0.53 & 1.21 & 0.59 & 0.000 \\
-\hline
-NOR2 & 11 & 8.36 & 8.33 & $-0.69$ & 0.66 & 1.48 & 0.72 & 0.000 \\
-\hline
-AND2 & 00 & 362.79 & 362.60 & $-0.24$ & 0.37 & 1.14 & 0.44 & 0.290 \\
-\hline
-AND2 & 01 & 310.57 & 308.01 & $-0.88$ & 0.88 & 2.07 & 0.94 & 0.673 \\
-\hline
-AND2 & 10 & 363.98 & 360.71 & $-1.08$ & 1.04 & 2.34 & 1.12 & 0.784 \\
-\hline
-AND2 & 11 & 336.73 & 340.09 & $-0.05$ & 0.33 & 1.16 & 0.43 & 0.270 \\
-\hline
-OR2 & 00 & 618.13 & 615.66 & $-0.86$ & 0.79 & 2.26 & 0.90 & 0.649 \\
-\hline
-OR2 & 01 & 531.85 & 530.25 & $-0.37$ & 0.52 & 1.17 & 0.55 & 0.155 \\
-\hline
-OR2 & 10 & 263.81 & 263.15 & $-0.23$ & 0.43 & 0.96 & 0.48 & 0.240 \\
-\hline
-OR2 & 11 & 148.46 & 149.44 & $+0.14$ & 0.38 & 1.21 & 0.46 & 0.136 \\
+OR2 & 11 & 262.54 & 264.15 & $+0.10$ & 0.26 & 0.97 & 0.38 / 1.21 \\
 \hline
 \end{tabularx}
-\caption{v3 gate results, supply-only leakage (deliverable 6).}
-\label{tab:g3vdd}
+\caption{Gate results (v3) for the 18 gate and input cases over 200 corners: total leakage, with the median and 95th-percentile error of the supply-only leakage in the last column.}
+\label{tab:g3}
 \end{table}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{gates_v3/gate_parity.png}
-\caption{Gate leakage, ML (v3) versus SPICE for all 3,600 operating points on log axes (deliverable 7): total leakage (left) and supply-only leakage (right).}
+\includegraphics[width=0.85\linewidth]{gates_v3/gate_parity.png}
+\caption{Gate parity plot (v3): ML against SPICE leakage for all 3,600 operating points on log axes; total leakage (left) and supply-only leakage (right).}
 \label{fig:gparity}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{gates_v3/gate_errors.png}
-\caption{Distribution of the v3 gate leakage error per case (total leakage), with the composition floor.}
-\label{fig:gerr}
-\end{figure}
-
-\noindent\textbf{Most and least accurate cases.} For the total leakage, the most accurate cases are INV at A = 1 (median error 0.22\,\%, p95 0.73\,\%), NAND2 at AB = 11 (0.24\,\%, 0.88\,\%) and OR2 at AB = 11 (0.26\,\%, 0.97\,\%). The least accurate are AND2 at AB = 01 (0.88\,\%, 2.07\,\%), OR2 at AB = 00 (0.79\,\%, 2.26\,\%) and AND2 at AB = 10 (0.78\,\%, 2.13\,\%). These three are the cases with the largest composition floor (0.62--0.67\,\%): their error comes mainly from the inner inverter's gate offset, and the model part of their error is similar to that of the other gates. Among the single-stage gates, the least accurate are NAND2 at AB = 00 (0.52\,\%) and INV at A = 0 (0.50\,\%); in both, gate tunnelling through ON PMOS devices carries most of the leakage (Table~\ref{tab:mech}), and NAND2 at 00 also contains a stack node held between two OFF transistors. For the supply-only leakage the ranking is the same, with AND2 at AB = 10 the least accurate case (1.04\,\%, 2.34\,\%) and INV at A = 1 the most accurate (0.30\,\%, 1.00\,\%).
-
-\keepspace{340pt}
-\subsection{Leakage Mechanisms and Alternative Estimators}
-\noindent Table~\ref{tab:mech} splits each gate's total leakage into its mechanisms using Eq.~\eqref{eq:power} with exact transistor currents. Gate tunnelling carries between 21\,\% and 86\,\% of the leakage, and dominates whenever inputs at logic 0 hold PMOS gates fully on (NAND2 at 00: 85.8\,\%). Junction leakage is negligible (below 0.01\,\%).
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.4cm}|c|C|C|C||>{\raggedright\arraybackslash}p{1.4cm}|c|C|C|}
-\hline
-\textbf{Gate} & \textbf{AB} & \textbf{Channel} & \textbf{Gate} & \textbf{Body} & \textbf{Gate} & \textbf{AB} & \textbf{Channel} & \textbf{Gate} \\
-\hline
-INV & 0 & 41.2 & 58.8 & 0.000 & NOR2 & 10 & 79.1 & 20.9 \\
-\hline
-INV & 1 & 75.3 & 24.7 & 0.000 & NOR2 & 11 & 35.4 & 64.5 \\
-\hline
-NAND2 & 00 & 14.2 & 85.8 & 0.000 & AND2 & 00 & 41.1 & 58.9 \\
-\hline
-NAND2 & 01 & 44.2 & 55.8 & 0.000 & AND2 & 01 & 57.9 & 42.1 \\
-\hline
-NAND2 & 10 & 37.7 & 62.3 & 0.000 & AND2 & 10 & 51.1 & 48.9 \\
-\hline
-NAND2 & 11 & 57.0 & 43.0 & 0.000 & AND2 & 11 & 51.3 & 48.7 \\
-\hline
-NOR2 & 00 & 24.9 & 75.1 & 0.004 & OR2 & 00 & 36.1 & 63.9 \\
-\hline
-NOR2 & 01 & 51.0 & 49.0 & 0.000 & OR2 & 01 & 49.1 & 50.9 \\
-\hline
- & & & & & OR2 & 10 & 60.2 & 39.8 \\
-\hline
- & & & & & OR2 & 11 & 33.9 & 66.0 \\
-\hline
-\end{tabularx}
-\caption{Share of total gate leakage (\%, median over corners) carried by the channel, gate tunnelling and the body/junctions. The body share is below 0.005\,\% in every case.}
-\label{tab:mech}
-\end{table}
-
-\noindent Table~\ref{tab:variants} compares four ways of obtaining the gate leakage from the v3 models. The prescribed method uses SPICE node voltages and Eq.~\eqref{eq:nodeset}. In the fully SPICE-free variant the output and internal nodes are solved from Kirchhoff's law with the transistor models; the solved outputs agree with SPICE within 0.25\,mV. Solved with the SPICE output, the internal nodes agree within 1\,mV except the stack nodes balanced between two OFF transistors (NAND2/AND2 $x$ at 00: 25\,mV worst; NOR2/OR2 $y$ at 11: 7\,mV worst). All four estimators agree to within 0.01 percentage points of mean error.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|L|c|c|c|}
-\hline
-\textbf{Estimator (v3, total leakage)} & \textbf{Median err.} & \textbf{p95 err.} & \textbf{Mean err.} \\
-\hline
-SPICE node voltages, node-set sum (Eq.~\ref{eq:nodeset}) & 0.40 & 1.46 & 0.52 \\
-\hline
-SPICE node voltages, power balance (Eq.~\ref{eq:power}) & 0.39 & 1.44 & 0.51 \\
-\hline
-ML-solved internal nodes, SPICE output & 0.39 & 1.44 & 0.51 \\
-\hline
-Fully SPICE-free (internal and output nodes from ML) & 0.39 & 1.43 & 0.51 \\
-\hline
-\end{tabularx}
-\caption{Gate leakage estimators over all 3,600 operating points (errors in \%).}
-\label{tab:variants}
-\end{table}
+\noindent\textbf{Most and least accurate cases.} The most accurate cases are INV at A = 1 (median error 0.22\,\%, p95 0.73\,\%), NAND2 at AB = 11 (0.24\,\%, 0.88\,\%) and OR2 at AB = 11 (0.26\,\%, 0.97\,\%). The least accurate are AND2 at AB = 01 and 10 and OR2 at AB = 00 (median 0.78--0.88\,\%, p95 up to 2.26\,\%), the cases with the largest composition floor (0.62--0.67\,\%): their error comes mainly from the inner inverter's gate offset, not from the models. Among single-stage gates, NAND2 at 00 and INV at 0 (0.52\,\% and 0.50\,\%) are least accurate, as gate tunnelling through ON PMOS devices dominates their leakage. The supply-only ranking is the same.
 
 % ==========================================
-% SECTION 5: TEST CIRCUIT
+% SECTION 5: TEST-CIRCUIT RESULTS
 % ==========================================
 \newpage
 \addtocontents{toc}{\protect\thispagestyle{tocpage}}
 \section{Test-Circuit Results}
 \label{sec:cla}
 
-\keepspace{369pt}
-\subsection{Test Circuit: 3-bit Carry-Lookahead Adder}
-\noindent The assigned test circuit is a 3-bit carry-lookahead adder. It has inputs $a_2a_1a_0$, $b_2b_1b_0$ and carry-in $c_0$, and outputs $s_2s_1s_0$ and carry-out $c_3$. It is built only from the Part B cells (Figure~\ref{fig:cla}). Every carry is formed directly from the generate and propagate signals and the carry-in:
-\begin{align}
-    g_i &= a_i b_i, \qquad p_i = a_i \oplus b_i, \qquad s_i = p_i \oplus c_i, \\
-    c_1 &= g_0 + p_0 c_0, \qquad c_2 = g_1 + p_1 g_0 + p_1 p_0 c_0, \\
-    c_3 &= g_2 + p_2 g_1 + p_2 p_1 g_0 + p_2 p_1 p_0 c_0 .
-\end{align}
-
-\noindent Each XOR is four NAND2 cells, and the product terms are shared between carries. The adder has 39 cells (24 NAND2, 9 AND2, 6 OR2) and 186 transistors, and a logic check confirms $s + 8c_3 = A + B + c_0$ for all 128 input combinations.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[scale=0.9, transform shape,
-    blk/.style={rectangle, rounded corners=3pt, draw, thick, fill=stagefill, align=center, font=\small, minimum width=3.4cm, minimum height=1.5cm},
-    arr/.style={-{Stealth[length=2.5mm]}, thick},
-    lab/.style={font=\scriptsize, align=center}
-]
-\node[blk] (gp) at (0,0)   {\textbf{Generate / propagate}\\ 3 AND2, 3 XOR\\ (12 NAND2)};
-\node[blk] (cl) at (5,0)   {\textbf{Carry lookahead}\\ 6 AND2, 6 OR2};
-\node[blk] (sm) at (10,0)  {\textbf{Sum}\\ 3 XOR\\ (12 NAND2)};
-\node[lab, left=0.7cm of gp] (in) {$a_2a_1a_0$\\ $b_2b_1b_0$};
-\node[lab, above=0.9cm of cl] (cin) {$c_0$};
-\node[lab, right=0.7cm of sm] (out) {$s_2s_1s_0$};
-\node[lab, below=0.9cm of cl] (cout) {$c_3$};
-\draw[arr] (in) -- (gp);
-\draw[arr] (gp) -- node[above, font=\scriptsize] {$g_i$, $p_i$} (cl);
-\draw[arr] (cl) -- node[above, font=\scriptsize] {$c_1$, $c_2$} (sm);
-\draw[arr] (cin) -- (cl);
-\draw[arr] (cin.east) -| ([xshift=-0.6cm]sm.north);
-\draw[arr] (gp.south) |- ([yshift=-0.35cm]cl.south) -| ([xshift=0.6cm]sm.south);
-\draw[arr] (cl) -- (cout);
-\end{tikzpicture}
-\caption{Structure of the 3-bit carry-lookahead adder ($p_i$ is routed to the sum stage).}
-\label{fig:cla}
-\end{figure}
-
-\keepspace{244pt}
-\subsection{SPICE Reference}
-\noindent The complete adder was simulated as one transistor-level netlist at all 128 input combinations and the same 200 corners as the gates (25,600 operating points). Every one of the 39 cell outputs lies at its correct rail within 1.4\,\% of $V_{DD}$ (worst offset 15.4\,mV, on the propagate net $p_2$, which drives the most cells), and the outputs equal $A + B + c_0$ at every operating point. Table~\ref{tab:claspice} and Figure~\ref{fig:claspice} summarize the leakage.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{2.0cm}|c|c|L|L|}
-\hline
-\textbf{Leakage} & \textbf{Median} & \textbf{Range} & \textbf{Lowest input (median)} & \textbf{Highest input (median)} \\
-\hline
-Total & 14.08\,$\mu$A & 3.05 -- 46.57\,$\mu$A & $A=0$, $B=0$, $c_0=0$: 12.62\,$\mu$A & $A=7$, $B=0$, $c_0=1$: 16.00\,$\mu$A \\
-\hline
-Supply only & 13.08\,$\mu$A & 2.58 -- 44.53\,$\mu$A & $A=7$, $B=7$, $c_0=1$: 11.78\,$\mu$A & $A=0$, $B=7$, $c_0=1$: 14.65\,$\mu$A \\
-\hline
-\end{tabularx}
-\caption{3-bit CLA leakage from SPICE over 128 input combinations and 200 corners.}
-\label{tab:claspice}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{test_circuit/spice_leakage.png}
-\caption{3-bit CLA leakage from SPICE per input combination (median and 5--95\,\% band over corners).}
-\label{fig:claspice}
-\end{figure}
-
 \keepspace{14\baselineskip}
-\subsection{Hierarchical ML Estimate}
-\noindent For each input combination a logic simulation gives the input bits of every cell, and each cell's leakage is taken from its Part B gate model at the same corner. As prescribed, every cell input is assumed to sit exactly at 0 or $V_{DD}$ and loading between cells is ignored. The total leakage of the adder is the sum of the cells' total leakages:
+\subsection{Test Circuit and Method}
+\noindent The 3-bit carry-lookahead adder adds $a_2a_1a_0$, $b_2b_1b_0$ and carry-in $c_0$, forming every carry directly from the generate and propagate signals $g_i = a_i b_i$ and $p_i = a_i \oplus b_i$ (for example $c_2 = g_1 + p_1 g_0 + p_1 p_0 c_0$), with sums $s_i = p_i \oplus c_i$. It uses only the gate library: each XOR is four NAND2, giving 39 cells (24 NAND2, 9 AND2, 6 OR2) and 186 transistors. The full transistor-level netlist was simulated in SPICE at all 128 input combinations and the same 200 corners (25,600 operating points); every output equals $A + B + c_0$.
+
+\medskip
+\noindent The ML estimate is hierarchical: a logic simulation gives every cell's input bits, and each cell's leakage comes from its gate model at the same corner, with inputs assumed at the rails and no loading between cells. The total leakage is the sum of the cells' total leakages. For the supply-only leakage, only the gate current drawn from primary inputs at logic 1 is subtracted, because a cell input driven by an internal net draws its current from $V_{DD}$ through the driving cell:
 \begin{equation}
     I^{\text{CLA}}_{\text{total}} = \sum_{c} I^{c}_{\text{total}}, \qquad
-    I^{\text{CLA}}_{\text{supply}} = I^{\text{CLA}}_{\text{total}} - \sum_{c} \sum_{p \in \text{PI}_1(c)} I^{c}_{p},
+    I^{\text{CLA}}_{\text{supply}} = I^{\text{CLA}}_{\text{total}} - \sum_{c} \sum_{p \in \text{PI}_1(c)} I^{c}_{p}.
     \label{eq:cla}
 \end{equation}
 
-\noindent where $\text{PI}_1(c)$ are the pins of cell $c$ driven by a primary input at logic 1 and $I^c_p$ is the current drawn through pin $p$. A cell input driven by an internal net at logic 1 draws its gate current from $V_{DD}$ through the driving cell, so it belongs to the supply current; only the current drawn from primary inputs is removed. Summing the cells' supply-only leakages instead misses that internal gate current and underestimates the supply-only leakage by about 17\,\% (Table~\ref{tab:clares}). The composition floor is obtained by summing the exact gate SPICE leakages.
-
-\keepspace{341pt}
+\keepspace{287pt}
 \subsection{Results}
-\noindent Table~\ref{tab:clares} gives the errors of the three versions for both leakage definitions over all 25,600 operating points (deliverable 8), and Figure~\ref{fig:claparity} shows the v3 parity plot. Per-input results for every version are in \texttt{results/test\_circuit*/cla\_results\_per\_input.csv}.
+\noindent Table~\ref{tab:clares} gives the test-circuit metrics and Figure~\ref{fig:claparity} the parity plot. The composition floor sums the exact gate SPICE leakages, and the naive sum adds the cells' supply-only leakages instead of using Eq.~\eqref{eq:cla}.
 
 \begin{table}[H]
 \centering
 \scriptsize
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.1cm}|>{\raggedright\arraybackslash}p{1.7cm}|C|C|C|C|C|C|C|c|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.1cm}|>{\raggedright\arraybackslash}p{1.7cm}|C|C|C|C|C|C|C|}
 \hline
-\textbf{Leakage} & \textbf{Estimate} & \textbf{SPICE median ($\mu$A)} & \textbf{ML median ($\mu$A)} & \textbf{Bias (\%)} & \textbf{Median err. (\%)} & \textbf{p95 err. (\%)} & \textbf{Mean err. (\%)} & \textbf{Mean accuracy (\%)} & \textbf{Max err. (\%)} \\
+\textbf{Leakage} & \textbf{Estimate} & \textbf{SPICE median ($\mu$A)} & \textbf{ML median ($\mu$A)} & \textbf{Bias (\%)} & \textbf{Median err. (\%)} & \textbf{p95 err. (\%)} & \textbf{Mean err. (\%)} & \textbf{Mean accuracy (\%)} \\
 \hline
-\multirow{4}{1.1cm}{Total} & ML v1 & 14.08 & 13.99 & $-1.19$ & 0.97 & 4.36 & 1.41 & 98.59 & 8.9 \\
-\cline{2-10}
- & ML v2 & 14.08 & 13.99 & $-0.86$ & \textbf{0.73} & 2.81 & 1.01 & 98.99 & 5.5 \\
-\cline{2-10}
- & ML v3 & 14.08 & 14.03 & $-0.86$ & 0.82 & \textbf{2.46} & \textbf{0.96} & \textbf{99.04} & \textbf{4.4} \\
-\cline{2-10}
- & Composition floor & 14.08 & 14.05 & $-0.47$ & 0.44 & 1.70 & 0.59 & 99.41 & -- \\
+\multirow{4}{1.1cm}{Total} & ML v1 & 14.08 & 13.99 & $-1.19$ & 0.97 & 4.36 & 1.41 & 98.59 \\
+\cline{2-9}
+ & ML v2 & 14.08 & 13.99 & $-0.86$ & \textbf{0.73} & 2.81 & 1.01 & 98.99 \\
+\cline{2-9}
+ & ML v3 & 14.08 & 14.03 & $-0.86$ & 0.82 & \textbf{2.46} & \textbf{0.96} & \textbf{99.04} \\
+\cline{2-9}
+ & Composition floor & 14.08 & 14.05 & $-0.47$ & 0.44 & 1.70 & 0.59 & 99.41 \\
 \hline
-\multirow{5}{1.1cm}{Supply only} & ML v1 & 13.08 & 12.99 & $-1.24$ & 1.02 & 4.48 & 1.47 & 98.53 & 9.0 \\
-\cline{2-10}
- & ML v2 & 13.08 & 12.99 & $-0.92$ & \textbf{0.79} & 2.91 & 1.06 & 98.94 & 5.5 \\
-\cline{2-10}
- & ML v3 & 13.08 & 13.01 & $-0.90$ & 0.87 & \textbf{2.55} & \textbf{1.01} & \textbf{98.99} & \textbf{4.5} \\
-\cline{2-10}
- & Composition floor & 13.08 & 13.05 & $-0.50$ & 0.47 & 1.77 & 0.63 & 99.37 & -- \\
-\cline{2-10}
- & Naive sum (v3) & 13.08 & 10.66 & $-17.29$ & 14.92 & 37.10 & 17.29 & 82.71 & -- \\
+\multirow{5}{1.1cm}{Supply only} & ML v1 & 13.08 & 12.99 & $-1.24$ & 1.02 & 4.48 & 1.47 & 98.53 \\
+\cline{2-9}
+ & ML v2 & 13.08 & 12.99 & $-0.92$ & \textbf{0.79} & 2.91 & 1.06 & 98.94 \\
+\cline{2-9}
+ & ML v3 & 13.08 & 13.01 & $-0.90$ & 0.87 & \textbf{2.55} & \textbf{1.01} & \textbf{98.99} \\
+\cline{2-9}
+ & Composition floor & 13.08 & 13.05 & $-0.50$ & 0.47 & 1.77 & 0.63 & 99.37 \\
+\cline{2-9}
+ & Naive sum (v3) & 13.08 & 10.66 & $-17.29$ & 14.92 & 37.10 & 17.29 & 82.71 \\
 \hline
 \end{tabularx}
-\caption{3-bit CLA results over 128 input combinations and 200 corners (deliverable 8): the same metrics as the gate results table, for the hierarchical ML estimate of each version against the full-netlist SPICE. The composition floor sums the exact gate SPICE leakages.}
+\caption{Test-circuit results over 128 input combinations and 200 corners.}
 \label{tab:clares}
 \end{table}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{test_circuit_v3/cla_parity.png}
-\caption{3-bit CLA leakage, hierarchical ML (v3) versus full-netlist SPICE for all 25,600 operating points on log axes (deliverable 8).}
+\caption{Test-circuit parity plot (v3): ML against SPICE leakage for all 25,600 operating points on log axes.}
 \label{fig:claparity}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{test_circuit_v3/cla_errors.png}
-\caption{Median error per input combination (v3), with the composition floor.}
-\label{fig:claerr}
-\end{figure}
-
-\noindent The adder is less accurate than the gates (mean error 0.96\,\% against 0.52\,\% for v3, total leakage), as the project document anticipates. About 0.6 percentage points of mean error come from the composition itself and remain even with exact gate SPICE values; the per-input error follows the same pattern as the composition floor (Figure~\ref{fig:claerr}). The model part alone, the ML estimate against the summed gate SPICE leakages, has median / p95 / mean errors of 0.65 / 3.20 / 0.97\,\% (v1), 0.40 / 1.30 / 0.51\,\% (v2) and 0.39 / 1.10 / 0.46\,\% (v3), improving in every statistic from v1 to v3. The slightly lower median of v2 in Table~\ref{tab:clares} arises because part of its model error cancels the negative composition bias; v3 has the lower 95th-percentile, mean and maximum errors.
+\noindent\textbf{Comparison with the gates.} With v3 the adder reaches a mean accuracy of 99.04\,\% (total) and 98.99\,\% (supply-only), against 99.48\,\% and 99.41\,\% for the gates. The difference comes from the composition itself: about 0.6 percentage points of mean error remain even with exact gate SPICE values (the composition floor), while the model part alone, ML against the summed gate SPICE leakages, has a mean error of only 0.46\,\%, similar to the gate level. The slightly lower median of v2 arises because part of its model error cancels the negative composition bias; v3 has the lower 95th-percentile and mean errors.
 
 % ==========================================
 % SECTION 6: ERROR ANALYSIS
@@ -1255,24 +649,13 @@ Supply only & 13.08\,$\mu$A & 2.58 -- 44.53\,$\mu$A & $A=7$, $B=7$, $c_0=1$: 11.
 \section{Error Analysis}
 \label{sec:errors}
 
-\keepspace{323pt}
-\subsection{Accuracy Across Versions}
-\noindent Figure~\ref{fig:progress} summarizes the mean accuracy of the three versions at gate and circuit level. With v3, the gate-level target of 99\,\% is met for both leakage definitions (99.48\,\% total, 99.41\,\% supply-only), and the adder reaches 99.04\,\% (total) and 98.99\,\% (supply-only).
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\linewidth]{analysis/accuracy_progression.png}
-\caption{Mean accuracy against SPICE for the three model versions.}
-\label{fig:progress}
-\end{figure}
-
 \keepspace{14\baselineskip}
 \subsection{Transistor Level}
-\noindent The largest relative errors at transistor level occur in three situations. (i) Near the sign change of $I_d$ and $I_s$ in the OFF cases, where the current is a small difference of large channel and gate-tunnelling parts: each part is predicted accurately, but a small error in either becomes a large relative error in their difference. (ii) The OFF-state body currents, which change sign near $10^{-17}$\,A. (iii) Operating points with terminals near the rails, which uniform sampling rarely visits (Table~\ref{tab:v123}). The first two have negligible effect on gate leakage because the affected currents are tiny; the third is the operating region of every transistor in a gate and was addressed by the rail-focused samples of v3.
+\noindent The largest relative errors of the transistor models occur in three places. The first is near the sign change of $I_d$ and $I_s$ in the OFF cases, where the current is a small difference of large channel and gate parts; each part is predicted accurately, but a small error in either becomes a large relative error. The second is the OFF-state body currents, which change sign near $10^{-17}$\,A. Both carry negligible leakage. The third is operating points with terminals near the rails, which uniform sampling rarely visits but every transistor in a gate occupies; this was the dominant gate-level error source in v1 and v2, and v3 removed it (Table~\ref{tab:v123}).
 
-\keepspace{282pt}
+\keepspace{263pt}
 \subsection{Gate Level}
-\noindent Table~\ref{tab:corner} gives the rank correlation of the absolute gate and adder errors with the main corner variables. In v1 and v2 the gate error grows at high temperature, supply voltage and PMOS threshold; in v3 every correlation is at most 0.13 in magnitude, so the gate error no longer depends on the operating conditions. The largest remaining gate errors occur in AND2 and OR2, whose composition floor (Section~\ref{sec:gates}) grows at high temperature.
+\noindent Table~\ref{tab:corner} shows how the error depends on the corner conditions. In v1 the gate error grows at high temperature, high $V_{DD}$ and high PMOS threshold voltage; the largest v1 error (25.7\,\%, NAND2 at 00) lies in the stacked pull-down, where the upper OFF transistor's source is lifted to $0.1\,V_{DD}$, a region sparsely covered by uniform data. In v3 every correlation is at most 0.13 in magnitude, so the gate error no longer depends on the operating conditions.
 
 \begin{table}[H]
 \centering
@@ -1281,15 +664,11 @@ Supply only & 13.08\,$\mu$A & 2.58 -- 44.53\,$\mu$A & $A=7$, $B=7$, $c_0=1$: 11.
 \hline
 \textbf{Level} & \textbf{Version} & $V_{DD}$ & \textbf{Temp.} & \texttt{vth0} (N) & \texttt{toxe} (N) & \texttt{vth0} (P) & \texttt{toxe} (P) \\
 \hline
-\multirow{3}{*}{Gates} & v1 & $+0.13$ & $+0.27$ & $-0.04$ & $+0.13$ & $+0.14$ & $+0.12$ \\
-\cline{2-8}
- & v2 & $+0.19$ & $+0.25$ & $-0.05$ & $+0.09$ & $+0.16$ & $+0.19$ \\
+\multirow{2}{*}{Gates} & v1 & $+0.13$ & $+0.27$ & $-0.04$ & $+0.13$ & $+0.14$ & $+0.12$ \\
 \cline{2-8}
  & v3 & $-0.03$ & $+0.13$ & $-0.01$ & $-0.01$ & $+0.03$ & $-0.08$ \\
 \hline
-\multirow{3}{*}{CLA} & v1 & $+0.15$ & $+0.63$ & $-0.14$ & $+0.14$ & $+0.20$ & $+0.15$ \\
-\cline{2-8}
- & v2 & $+0.15$ & $+0.73$ & $-0.20$ & $+0.10$ & $+0.24$ & $+0.25$ \\
+\multirow{2}{*}{CLA} & v1 & $+0.15$ & $+0.63$ & $-0.14$ & $+0.14$ & $+0.20$ & $+0.15$ \\
 \cline{2-8}
  & v3 & $-0.09$ & $+0.73$ & $-0.18$ & $+0.05$ & $+0.23$ & $+0.05$ \\
 \hline
@@ -1298,12 +677,12 @@ Supply only & 13.08\,$\mu$A & 2.58 -- 44.53\,$\mu$A & $A=7$, $B=7$, $c_0=1$: 11.
 \label{tab:corner}
 \end{table}
 
-\noindent Table~\ref{tab:worst} traces the five largest v3 gate errors by comparing them with the composition floor at the same operating point. In four of the five, most of the error is the AND2/OR2 inner-gate offset at high temperature rather than model error. The remaining case (NOR2 at 11, corner 145) is a 4\,\% underestimate of the ON-state NMOS gate current at 97\,$^{\circ}$C. For v1 the largest gate error was 25.7\,\% (NAND2 at 00), in the stacked pull-down where the upper OFF transistor has its source lifted by the stack effect, a region sparsely covered by uniform data; with v3 the largest error over all 3,600 points is 3.6\,\%.
+\noindent Table~\ref{tab:worst} splits the five largest v3 gate errors into the composition floor and the model part. Four of the five are AND2 or OR2 at high temperature, where most of the error is the inner inverter's gate offset; the remaining one (NOR2 at 11) is a 4\,\% underestimate of the ON-state NMOS gate current at 97\,$^{\circ}$C.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.6cm}|c|>{\raggedright\arraybackslash}p{3.2cm}|C|C|C|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{1.6cm}|c|>{\raggedright\arraybackslash}p{3.4cm}|C|C|C|}
 \hline
 \textbf{Gate, AB} & \textbf{Corner} & \textbf{Conditions} & \textbf{ML error} & \textbf{Composition floor} & \textbf{Model part} \\
 \hline
@@ -1318,13 +697,13 @@ AND2, 10 & 186 & 121\,$^{\circ}$C, 0.959\,V, NMOS \texttt{vth0} $-9.1\,\%$ & $-3
 OR2, 00 & 109 & 82\,$^{\circ}$C, 1.075\,V, NMOS \texttt{vth0} $+9.7\,\%$ & $-3.07$ & $-1.61$ & $-1.46$ \\
 \hline
 \end{tabularx}
-\caption{The five largest v3 gate errors (total leakage, \%), split into composition floor and model part.}
+\caption{The five largest v3 gate errors (total leakage, \%).}
 \label{tab:worst}
 \end{table}
 
 \keepspace{293pt}
-\subsection{Circuit Level}
-\noindent The adder error depends strongly on temperature in all versions (Table~\ref{tab:corner}, $\rho \approx 0.7$). Table~\ref{tab:clatemp} shows that this is mainly a composition effect: the composition bias grows from $+0.06\,\%$ to $-1.05\,\%$ between the lowest and highest temperature thirds, while the model part grows much less. Across input combinations, the bias correlates with the number of internal nets at logic 1 ($\rho = -0.64$; $-0.90$ for the composition floor alone): internal nets at 1 drive cell inputs with slightly degraded logic levels, which the gate models, with inputs exactly at the rails, do not represent, and the adder then leaks more than the sum of its isolated gates.
+\subsection{Test-Circuit Level}
+\noindent The adder error grows strongly with temperature in every version ($\rho \approx 0.7$, Table~\ref{tab:corner}). Table~\ref{tab:clatemp} shows that this is mainly a composition effect: the composition bias grows from $+0.06\,\%$ to $-1.05\,\%$ from the lowest to the highest temperature third, while the model part grows much less. Internal nets at logic 1 drive cell inputs with slightly degraded levels, which the gate models (inputs exactly at the rails) do not see, so the adder leaks more than the sum of its isolated gates; accordingly, the bias correlates with the number of internal nets at 1 ($\rho = -0.90$ for the composition floor). Errors that are common to many cells add up over the 39 cells, while isolated cell errors are diluted.
 
 \begin{table}[H]
 \centering
@@ -1340,32 +719,8 @@ Middle & 21 -- 74 & 0.80 & $-0.78$ & $-0.44$ & 0.38 \\
 High & 75 -- 124 & 1.53 & $-1.65$ & $-1.05$ & 0.58 \\
 \hline
 \end{tabularx}
-\caption{3-bit CLA error (v3, total leakage, \%) by temperature.}
+\caption{Test-circuit error (v3, total leakage, \%) by temperature.}
 \label{tab:clatemp}
-\end{table}
-
-\noindent Correlated errors accumulate over the 39 cells of the adder while isolated errors are diluted: a single cell with a large error changes the adder leakage by a fraction of a percent, whereas a small bias common to many cells adds up. The adder therefore rewards an unbiased gate model more than a low worst-case gate error.
-
-\keepspace{251pt}
-\subsection{Summary of Error Sources}
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{4.2cm}|L|L|}
-\hline
-\textbf{Error source} & \textbf{Where it appears} & \textbf{Magnitude (v3)} \\
-\hline
-Transistor models & All gates and the adder & Gate mean error 0.52\,\% (total); adder model part 0.46\,\% mean \\
-\hline
-Inner-gate offset (AND2, OR2) & AND2 and OR2, growing with temperature & 0.08--0.67\,\% median per case; up to 3.2\,\% at high temperature \\
-\hline
-Hierarchical composition (inputs at the rails, no loading) & Adder only & 0.59\,\% mean; bias $-1.05\,\%$ at high temperature \\
-\hline
-Near-zero currents (sign changes, body current) & Transistor-level relative errors & Large relative error, negligible effect on leakage \\
-\hline
-\end{tabularx}
-\caption{Sources of error in the final (v3) results.}
-\label{tab:sources}
 \end{table}
 
 % ==========================================
@@ -1379,133 +734,76 @@ Near-zero currents (sign changes, body current) & Transistor-level relative erro
 \keepspace{14\baselineskip}
 \subsection{Limitations}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Gate voltages at the rails only.} The four transistor models represent gates exactly at 0 or $V_{DD}$. Gates driven by internal nodes that sit a few millivolts from their rail (the inverters of AND2 and OR2, and every cell inside the adder) cannot be represented exactly; this is the main remaining error at gate level and the dominant error at circuit level.
-    \item \textbf{No loading in the hierarchy.} The adder estimate sums isolated gate leakages, as prescribed; loading and degraded logic levels between cells account for about 0.6 percentage points of mean error.
-    \item \textbf{Relative error of near-zero currents.} The mean relative error of individual currents is inflated by samples near a sign change; these samples carry little leakage.
-    \item \textbf{Reproducibility across machines.} SPICE results are bit-identical across simulator versions (ngspice 42 and 45.2) and machines. Retrained networks are identical on the same machine but differ slightly across machines, so retraining reproduces the reported accuracy closely but not to the last digit.
-    \item \textbf{Fixed sizing and structure.} Gate widths, the series-transistor order and the adder structure are fixed design choices; other choices would change the absolute leakage values.
+    \item \textbf{Gate voltages only at the rails.} The transistor models represent gates exactly at 0 or $V_{DD}$, so gates driven by internal nodes a few millivolts from a rail (the inverters of AND2 and OR2, and every cell inside the adder) are not represented exactly. This is the main remaining error at gate level.
+    \item \textbf{No loading between cells.} The hierarchical estimate sums isolated gate leakages; loading and degraded logic levels between cells cost about 0.6 percentage points of mean accuracy at circuit level and grow with temperature.
+    \item \textbf{Relative error of near-zero currents.} Currents that are small differences of large parts (near a sign change, or the body current) have large relative errors, although they carry almost no leakage.
 \end{itemize}
 
 \keepspace{14\baselineskip}
 \subsection{Improvements}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Gate-voltage input.} Training the transistor models with the gate voltage as an input (small offsets around each rail) would remove the inner-gate offset error of AND2 and OR2 and much of the adder's composition error.
-    \item \textbf{Loading-aware hierarchy.} Propagating the predicted logic levels of internal nets from cell to cell, instead of assuming exact rails, would address the composition bias at circuit level.
-    \item \textbf{Bias correction.} Because correlated errors accumulate over many cells, a calibration that removes the residual mean bias of the gate models would improve circuit-level accuracy directly.
-    \item \textbf{Operating-region sampling.} The success of rail-focused samples suggests sampling designed around the operating points of the target circuits (for example stack nodes between two OFF transistors) as a general strategy.
+    \item \textbf{Gate voltage as a model input.} Training with the gate voltage varied slightly around each rail would remove the inner-gate offset error of AND2 and OR2 and much of the adder's composition error.
+    \item \textbf{Loading-aware composition.} Propagating the predicted logic level of each internal net from cell to cell, instead of assuming exact rails, would address the composition bias at circuit level.
+    \item \textbf{Bias correction.} Because errors common to many cells accumulate in a circuit, calibrating out the residual mean bias of the gate models would directly improve circuit-level accuracy.
+    \item \textbf{Sampling around operating points.} Rail-focused sampling was the most effective improvement; sampling designed around other critical operating points, such as stack nodes between two OFF transistors, would extend it.
 \end{itemize}
 
 % ==========================================
-% SECTION 8: CONCLUSION
+% SECTION 8: CONTRIBUTIONS
 % ==========================================
-\keepspace{14\baselineskip}
+\keepspace{565pt}
 \addtocontents{toc}{\protect\thispagestyle{tocpage}}
-\section{Conclusion}
-\label{sec:conclusion}
-\noindent Neural-network models of the four transistor cases, trained only on single-transistor SPICE data, predict the leakage of INV, NAND2, NOR2, AND2 and OR2 gates across 200 random PVT corners with a mean accuracy of 99.48\,\% (total leakage) and 99.41\,\% (supply-only leakage), with no operating point worse than 3.6\,\% (total). Built hierarchically from these gate models, the leakage of a 186-transistor 3-bit carry-lookahead adder is predicted with a mean accuracy of 99.04\,\% (total) and 98.99\,\% (supply-only) over 128 input combinations and 200 corners.
+\section{Contributions}
+\label{sec:contrib}
 
-\medskip
-\noindent The final accuracy was reached in three steps: more training data with averaged networks (v2), and training data concentrated where transistors operate inside gates together with physics-based features (v3). The remaining error at circuit level comes mainly from the hierarchical composition itself, which treats every cell input as exactly at a rail; modelling the gate voltage explicitly and propagating logic levels between cells are the natural next steps.
-
-% ==========================================
-% APPENDIX
-% ==========================================
-\newpage
-\appendix
-\addtocontents{toc}{\protect\thispagestyle{tocpage}}
-\section{Reproducibility}
-\label{sec:repro}
-\noindent Every result in this report is regenerated from the model file by scripts run in a fixed order with fixed random seeds. Each step that adds a model version fingerprints all earlier data, models and results and verifies afterwards that they are unchanged.
-
-\noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}
-./setup.sh               # ngspice, Python environment, environment check
-make check               # environment and configuration check
-make fet-data            # transistor datasets (deliverable 1)
-make data-check          # Kirchhoff check and trend plots (deliverable 3)
-make train               # model comparison and v1 models (deliverables 4, 5)
-make gates-spice         # gate SPICE reference
-make gates-ml            # gate ML, v1 (deliverables 6, 7)
-make cla-spice           # adder SPICE reference
-make cla-ml              # adder ML, v1 (deliverable 8)
-make improve             # v2: additional uniform data, averaged networks
-make gates-ml-v2 cla-ml-v2
-make rail-models         # v3: rail-focused data, physics features
-make gates-ml-v3 cla-ml-v3
-make analysis            # cross-version error analysis
-\end{lstlisting}
-\end{minipage}
+\noindent The work was divided so that each member owned one stage of the pipeline and one further component of comparable size. Each member wrote the report sections on their own work, and all members reviewed the complete results.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{5.4cm}|L|}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.6cm}|L|}
 \hline
-\textbf{Location} & \textbf{Content} \\
+\textbf{Member} & \textbf{Contributions} \\
 \hline
-\texttt{data/fet/} & Deliverable datasets (4 $\times$ 10,000 rows) and splits \\
+Vishnubhotla Nitin Sri Siva Kalyan (2024112012) &
+\vspace{-0.9em}
+\begin{itemize}[leftmargin=*, nosep, topsep=0pt]
+    \item Transistor data generation: PVT and bias sampling, single-transistor netlists with source/drain geometry, and the batch SPICE simulation of the four 10,000-sample datasets.
+    \item Data check: Kirchhoff check of all samples and the three trend plots with controlled SPICE sweeps.
+    \item Test circuit: design of the 3-bit carry-lookahead adder from the gate library and its full transistor-level SPICE reference over 128 inputs and 200 corners.
+\end{itemize}
+\vspace{-0.9em} \\
 \hline
-\texttt{data/fet\_extra/}, \texttt{data/fet\_rail/} & Additional uniform and rail-focused samples \\
+Anay Rungta (2024102050) &
+\vspace{-0.9em}
+\begin{itemize}[leftmargin=*, nosep, topsep=0pt]
+    \item Proposed and generated the rail-focused samples, which target the operating region of transistors inside gates.
+    \item v3 models: physics-based input features, training with the rail-focused data, and evaluation on the rail-focused test set.
+    \item Error analysis: dependence of the errors on corner conditions, and the tracing of the largest gate errors to their composition and model parts.
+\end{itemize}
+\vspace{-0.9em} \\
 \hline
-\texttt{netlists/} & Example netlists: transistor cases, gates, adder (deliverable 2) \\
+Alapati Sai Pavan Adit (2024102064) &
+\vspace{-0.9em}
+\begin{itemize}[leftmargin=*, nosep, topsep=0pt]
+    \item Learning targets and preprocessing: the Kirchhoff-consistent target split and input features of the transistor models.
+    \item Model comparison: the four model types, their hyperparameter grids, selection on the validation set and the learning curve.
+    \item v2 models: training on the additional uniform data and averaging of independently trained networks.
+\end{itemize}
+\vspace{-0.9em} \\
 \hline
-\texttt{models/}, \texttt{models\_v2/}, \texttt{models\_v3/} & Saved transistor models of each version (deliverable 5) \\
-\hline
-\texttt{results/data\_check/} & Kirchhoff check, trend plots, sensitivity (deliverable 3) \\
-\hline
-\texttt{results/model\_selection*/} & Model comparison and version comparisons (deliverables 4, 5) \\
-\hline
-\texttt{results/gates*/} & Gate SPICE summary and gate results of each version (deliverables 6, 7) \\
-\hline
-\texttt{results/test\_circuit*/} & Adder SPICE summary and results of each version (deliverable 8) \\
-\hline
-\texttt{results/analysis/} & Cross-version error analysis \\
-\hline
-\texttt{config.yaml}, \texttt{DECISIONS.md} & All parameters and seeds; record of design decisions \\
-\hline
-\end{tabularx}
-\caption{Project structure (code in \texttt{src/} and \texttt{scripts/}, deliverable 9).}
-\label{tab:structure}
-\end{table}
-
-\keepspace{361pt}
-\addtocontents{toc}{\protect\thispagestyle{tocpage}}
-\section{Design Decisions}
-\label{sec:decisions}
-\noindent Table~\ref{tab:decisions} records choices that the project document leaves open.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{4.0cm}|L|}
-\hline
-\textbf{Decision} & \textbf{Choice} \\
-\hline
-Leakage definition & Both reported: total (all sources at $V_{DD}$, static power / $V_{DD}$) and supply-only \\
-\hline
-Source/drain geometry & $AS = AD = W \cdot 44$\,nm, $PS = PD = 2(W + 44\,\text{nm})$ in every netlist \\
-\hline
-Current sign convention & ngspice source branch current $I(V_x)$ (positive out of the device terminal) \\
-\hline
-Gate sizing & INV 44/88\,nm, NAND2 88/88\,nm, NOR2 44/176\,nm ($W_n$/$W_p$) \\
-\hline
-Series-transistor order & NAND2: B at the output, A at ground; NOR2: A at $V_{DD}$, B at the output \\
-\hline
-Body connections & NMOS to ground, PMOS to $V_{DD}$ \\
-\hline
-Gate leakage composition & Node-set sum (Eq.~\ref{eq:nodeset}) with SPICE-recorded node voltages; power balance (Eq.~\ref{eq:power}) as a check \\
-\hline
-Adder & 39 cells from the Part B library with carry-in; supply-only estimate by Eq.~\eqref{eq:cla} \\
-\hline
-Additional training data & 20,000 uniform (v2) and 7,000 rail-focused (v3) samples per case, in addition to the unchanged 10,000-row deliverable datasets \\
-\hline
-Model selection & Lowest validation 95th-percentile error; test set used once \\
+Vidvathama R (2024122002) &
+\vspace{-0.9em}
+\begin{itemize}[leftmargin=*, nosep, topsep=0pt]
+    \item Gate library and SPICE reference: transistor-level netlists of the five gates and their simulation at 18 input cases and 200 corners.
+    \item Gate-level ML estimate: composition of gate leakage from the transistor models by Kirchhoff's law, for both leakage definitions.
+    \item Hierarchical test-circuit estimate: cell-level composition of the adder leakage and the supply-only correction.
+\end{itemize}
+\vspace{-0.9em} \\
 \hline
 \end{tabularx}
-\caption{Design decisions.}
-\label{tab:decisions}
+\caption{Contributions of the team members.}
+\label{tab:contrib}
 \end{table}
-
-
 
 \end{document}
