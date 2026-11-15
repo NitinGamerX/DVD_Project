@@ -15,3 +15,10 @@ report/*.fls
 report/*.fdb_latexmk
 report/*.synctex.gz
 .spiceinit
+.venv/
+work/
+__pycache__/
+report/*.aux
+report/*.log
+report/*.toc
+report/*.out
